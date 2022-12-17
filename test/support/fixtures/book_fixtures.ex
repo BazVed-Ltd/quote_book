@@ -33,4 +33,19 @@ defmodule QuoteBook.BookFixtures do
 
     quote
   end
+
+  @doc """
+  Generate a attachment.
+  """
+  def attachment_fixture(attrs \\ %{}) do
+    {:ok, attachment} =
+      attrs
+      |> Enum.into(%{
+        path: "some path",
+        type: :photo
+      })
+      |> QuoteBook.Book.create_attachment()
+
+    attachment
+  end
 end

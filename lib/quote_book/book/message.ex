@@ -10,6 +10,8 @@ defmodule QuoteBook.Book.Message do
 
     belongs_to :reply_message, QuoteBook.Book.Message
 
+    has_many :attachments, QuoteBook.Book.Attachment
+
     timestamps()
   end
 
@@ -19,5 +21,6 @@ defmodule QuoteBook.Book.Message do
     |> cast(attrs, [:text, :peer_id, :from_id, :datetime])
     |> validate_required([:text, :peer_id, :from_id, :datetime])
     |> cast_assoc(:reply_message)
+    |> cast_assoc(:attachments)
   end
 end
