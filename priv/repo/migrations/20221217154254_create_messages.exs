@@ -8,7 +8,7 @@ defmodule QuoteBook.Repo.Migrations.CreateMessages do
       add :from_id, :integer
       add :reply_message_id, references(:messages, on_delete: :nothing)
 
-      add :datetime, :integer
+      add :date, :integer
 
       timestamps()
     end

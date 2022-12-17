@@ -6,7 +6,7 @@ defmodule QuoteBook.Book.Message do
     field :from_id, :integer
     field :peer_id, :integer
     field :text, :string
-    field :datetime, :integer
+    field :date, :integer
 
     belongs_to :reply_message, QuoteBook.Book.Message
 
@@ -18,8 +18,8 @@ defmodule QuoteBook.Book.Message do
   @doc false
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:text, :peer_id, :from_id, :datetime])
-    |> validate_required([:text, :peer_id, :from_id, :datetime])
+    |> cast(attrs, [:text, :peer_id, :from_id, :date])
+    |> validate_required([:text, :peer_id, :from_id, :date])
     |> cast_assoc(:reply_message)
     |> cast_assoc(:attachments)
   end
