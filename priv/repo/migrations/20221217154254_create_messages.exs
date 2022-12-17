@@ -7,6 +7,7 @@ defmodule QuoteBook.Repo.Migrations.CreateMessages do
       add :peer_id, :integer
       add :from_id, :integer
       add :reply_message_id, references(:messages, on_delete: :nothing)
+      add :fwd_from_message_id, references(:messages, on_delete: :nothing)
 
       add :date, :integer
 
@@ -14,5 +15,6 @@ defmodule QuoteBook.Repo.Migrations.CreateMessages do
     end
 
     create index(:messages, [:reply_message_id])
+    create index(:messages, [:fwd_from_message_id])
   end
 end
