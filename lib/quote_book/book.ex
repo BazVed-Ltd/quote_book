@@ -21,6 +21,16 @@ defmodule QuoteBook.Book do
     Repo.all(Message)
   end
 
+  @raw_sql_message_tree """
+  SELECT *, 0 as depth
+  FROM messages
+  WHERE id = ?
+  UNION ALL
+  SELECT n.*, depth + 1
+  FROM messages n
+  INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id
+  """
+
   @doc """
   Gets a single message.
 
@@ -35,7 +45,15 @@ defmodule QuoteBook.Book do
       ** (Ecto.NoResultsError)
 
   """
-  def get_message!(id), do: Repo.get!(Message, id)
+  def get_message!(id) do
+    query =
+      {"message_tree", Message}
+      |> recursive_ctes(true)
+      |> with_cte("message_tree", as: fragment(@raw_sql_message_tree, ^id))
+      |> select_merge([m], %{depth: m.depth})
+
+    Repo.all(query)
+  end
 
   @doc """
   Creates a message.

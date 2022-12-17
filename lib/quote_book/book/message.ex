@@ -8,6 +8,8 @@ defmodule QuoteBook.Book.Message do
     field :text, :string
     field :date, :integer
 
+    field :depth, :integer, load_in_query: false
+
     belongs_to :reply_message, QuoteBook.Book.Message
 
     has_many :attachments, QuoteBook.Book.Attachment
