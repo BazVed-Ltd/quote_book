@@ -15,6 +15,12 @@ defmodule QuoteBook.Book.Attachment do
   def changeset(attachment, attrs) do
     attachment
     |> cast(attrs, [:path, :type])
+    |> cast_path()
     |> validate_required([:path, :type])
+  end
+
+  defp cast_path(attachment) do
+    attachment
+    |> put_change(:path, "empty")
   end
 end

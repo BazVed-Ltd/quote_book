@@ -8,6 +8,16 @@ defmodule QuoteBook.Book do
 
   alias QuoteBook.Book.Message
 
+  @raw_sql_all_messages """
+  SELECT *, 0 as depth
+  FROM messages
+  WHERE fwd_from_message_id IS null
+  UNION ALL
+  SELECT n.*, depth + 1
+  FROM messages n
+  INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id
+  """
+
   @doc """
   Returns the list of messages.
 
@@ -17,14 +27,29 @@ defmodule QuoteBook.Book do
       [%Message{}, ...]
 
   """
-  def list_messages do
-    Repo.all(Message)
+  def list_quotes do
+    query =
+      {"message_tree", Message}
+      |> recursive_ctes(true)
+      |> with_cte("message_tree", as: fragment(@raw_sql_all_messages))
+      |> select_merge([m], %{depth: m.depth})
+      |> preload(:attachments)
+
+    Repo.all(query)
+  end
+
+  def count_quotes do
+    query =
+      from m in Message,
+        where: is_nil(m.fwd_from_message_id)
+
+    Repo.aggregate(query, :count, :id)
   end
 
   @raw_sql_message_tree """
   SELECT *, 0 as depth
   FROM messages
-  WHERE id = ?
+  WHERE quote_id = ?
   UNION ALL
   SELECT n.*, depth + 1
   FROM messages n
@@ -45,12 +70,13 @@ defmodule QuoteBook.Book do
       ** (Ecto.NoResultsError)
 
   """
-  def get_message!(id) do
+  def get_quote!(id) do
     query =
       {"message_tree", Message}
       |> recursive_ctes(true)
       |> with_cte("message_tree", as: fragment(@raw_sql_message_tree, ^id))
       |> select_merge([m], %{depth: m.depth})
+      |> preload(:attachments)
 
     Repo.all(query)
   end
@@ -67,7 +93,7 @@ defmodule QuoteBook.Book do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_message(attrs \\ %{}) do
+  def create_quote_from_message(attrs \\ %{}) do
     %Message{}
     |> Message.changeset(attrs)
     |> Repo.insert()

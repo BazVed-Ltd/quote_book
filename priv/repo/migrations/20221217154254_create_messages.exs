@@ -3,6 +3,7 @@ defmodule QuoteBook.Repo.Migrations.CreateMessages do
 
   def change do
     create table(:messages) do
+      add :quote_id, :integer
       add :text, :string
       add :peer_id, :integer
       add :from_id, :integer

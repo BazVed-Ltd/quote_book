@@ -3,6 +3,7 @@ defmodule QuoteBook.Book.Message do
   import Ecto.Changeset
 
   schema "messages" do
+    field :quote_id, :id
     field :from_id, :integer
     field :peer_id, :integer
     field :text, :string
@@ -29,5 +30,11 @@ defmodule QuoteBook.Book.Message do
     |> cast_assoc(:reply_message)
     |> cast_assoc(:attachments)
     |> cast_assoc(:fwd_messages)
+    |> cast_quote_id()
+  end
+
+  defp cast_quote_id(message) do
+    message
+    |> put_change(:quote_id, QuoteBook.Book.count_quotes)
   end
 end
