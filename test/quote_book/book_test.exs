@@ -61,58 +61,6 @@ defmodule QuoteBook.BookTest do
     end
   end
 
-  describe "quotes" do
-    alias QuoteBook.Book.Quote
-
-    import QuoteBook.BookFixtures
-
-    @invalid_attrs %{}
-
-    test "list_quotes/0 returns all quotes" do
-      quote = quote_fixture()
-      assert Book.list_quotes() == [quote]
-    end
-
-    test "get_quote!/1 returns the quote with given id" do
-      quote = quote_fixture()
-      assert Book.get_quote!(quote.id) == quote
-    end
-
-    test "create_quote/1 with valid data creates a quote" do
-      valid_attrs = %{}
-
-      assert {:ok, %Quote{} = quote} = Book.create_quote(valid_attrs)
-    end
-
-    test "create_quote/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Book.create_quote(@invalid_attrs)
-    end
-
-    test "update_quote/2 with valid data updates the quote" do
-      quote = quote_fixture()
-      update_attrs = %{}
-
-      assert {:ok, %Quote{} = quote} = Book.update_quote(quote, update_attrs)
-    end
-
-    test "update_quote/2 with invalid data returns error changeset" do
-      quote = quote_fixture()
-      assert {:error, %Ecto.Changeset{}} = Book.update_quote(quote, @invalid_attrs)
-      assert quote == Book.get_quote!(quote.id)
-    end
-
-    test "delete_quote/1 deletes the quote" do
-      quote = quote_fixture()
-      assert {:ok, %Quote{}} = Book.delete_quote(quote)
-      assert_raise Ecto.NoResultsError, fn -> Book.get_quote!(quote.id) end
-    end
-
-    test "change_quote/1 returns a quote changeset" do
-      quote = quote_fixture()
-      assert %Ecto.Changeset{} = Book.change_quote(quote)
-    end
-  end
-
   describe "attachments" do
     alias QuoteBook.Book.Attachment
 

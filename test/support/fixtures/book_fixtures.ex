@@ -21,20 +21,6 @@ defmodule QuoteBook.BookFixtures do
   end
 
   @doc """
-  Generate a quote.
-  """
-  def quote_fixture(attrs \\ %{}) do
-    {:ok, quote} =
-      attrs
-      |> Enum.into(%{
-
-      })
-      |> QuoteBook.Book.create_quote()
-
-    quote
-  end
-
-  @doc """
   Generate a attachment.
   """
   def attachment_fixture(attrs \\ %{}) do
