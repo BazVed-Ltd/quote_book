@@ -20,7 +20,7 @@ defmodule QuoteBookWeb.Endpoint do
     at: "/",
     from: :quote_book,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only: ~w(attachments assets fonts images favicon.ico robots.txt)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

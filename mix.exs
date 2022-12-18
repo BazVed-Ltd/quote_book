@@ -49,6 +49,7 @@ defmodule QuoteBook.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
+      {:image, "~> 0.14.0"},
       {:vk_bot, path: "../vk_bot"},
     ]
   end
