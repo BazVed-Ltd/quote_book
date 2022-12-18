@@ -36,9 +36,10 @@ defmodule QuoteBook.Book do
       |> preload(:attachments)
 
     Repo.all(query)
+    |> remake_tree()
   end
 
-  def count_quotes do
+  def quotes_count do
     query =
       from m in Message,
         where: is_nil(m.fwd_from_message_id)
@@ -79,6 +80,42 @@ defmodule QuoteBook.Book do
       |> preload(:attachments)
 
     Repo.all(query)
+    |> remake_tree()
+    |> List.first()
+  end
+
+  defp remake_tree(messages) do
+    fwd_messages = Enum.group_by(messages, fn message -> message.fwd_from_message_id end)
+    reply_messages = Enum.group_by(messages, fn message -> message.reply_message_id end)
+
+    quotes = Enum.filter(messages, fn message -> message.quote_id end)
+
+    quotes
+    |> Enum.map(&insert_fwd_and_reply_message(&1, fwd_messages, reply_messages))
+  end
+
+  defp insert_fwd_and_reply_message(message, fwd_messages, reply_messages) do
+    message =
+      case Map.get(fwd_messages, message.id) do
+        nil ->
+          message
+
+        msgs ->
+          full_msgs =
+            Enum.map(msgs, &insert_fwd_and_reply_message(&1, fwd_messages, reply_messages))
+
+          Map.put(message, :fwd_messages, full_msgs)
+      end
+
+    case Map.get(reply_messages, message.id) do
+      nil ->
+        message
+
+      [msg] ->
+        full_msg = insert_fwd_and_reply_message(msg, fwd_messages, reply_messages)
+
+        Map.put(message, :reply_message, full_msg)
+    end
   end
 
   @doc """
