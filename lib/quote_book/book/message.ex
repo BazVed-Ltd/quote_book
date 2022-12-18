@@ -11,7 +11,9 @@ defmodule QuoteBook.Book.Message do
 
     field :depth, :integer, load_in_query: false
 
-    belongs_to :reply_message, QuoteBook.Book.Message
+    field :reply_message_id, :id
+    has_one :reply_message, QuoteBook.Book.Message,
+    foreign_key: :reply_message_id
 
     has_many :attachments, QuoteBook.Book.Attachment
 

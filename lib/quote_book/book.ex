@@ -11,11 +11,11 @@ defmodule QuoteBook.Book do
   @raw_sql_all_messages """
   SELECT *, 0 as depth
   FROM messages
-  WHERE fwd_from_message_id IS null
+  WHERE fwd_from_message_id IS null AND reply_message_id IS null
   UNION ALL
   SELECT n.*, depth + 1
   FROM messages n
-  INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id
+  INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id OR fwd.reply_message_id = n.id
   """
 
   @doc """
@@ -53,7 +53,7 @@ defmodule QuoteBook.Book do
   UNION ALL
   SELECT n.*, depth + 1
   FROM messages n
-  INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id
+  INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id OR fwd.id = n.reply_message_id
   """
 
   @doc """
