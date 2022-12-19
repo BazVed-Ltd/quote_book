@@ -1,6 +1,8 @@
 defmodule QuoteBookBot.Commands.SaveQuote do
   use VkBot.CommandsManager
 
+  alias QuoteBookBot.UserLoader
+
   defcommand event, on_text: "/сьлржалсч" do
     message =
       event
@@ -10,6 +12,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
 
     case QuoteBook.Book.create_quote_from_message(message) do
       {:ok, q} ->
+        UserLoader.insert_new_users_data_to_db()
         {:ok, Integer.to_string(q.quote_id)}
 
       err ->
