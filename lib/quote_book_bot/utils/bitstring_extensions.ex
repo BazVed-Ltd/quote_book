@@ -1,4 +1,4 @@
-defmodule QuoteBookBot.BitUtils do
+defmodule QuoteBookBot.Utils.BitstringExtensions do
   def chunks(binary, n) do
     do_chunks(binary, n, [])
   end

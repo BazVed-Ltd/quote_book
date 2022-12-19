@@ -1,4 +1,4 @@
-defmodule QuoteBookBot.UserLoader do
+defmodule QuoteBookBot.Utils.UserLoader do
   alias QuoteBook.Book
 
   def insert_new_users_data_to_db() do
@@ -13,6 +13,7 @@ defmodule QuoteBookBot.UserLoader do
   end
 
   def update_exists_users() do
+    # TODO: add cron
     users_list = Book.list_users()
 
     users_list
