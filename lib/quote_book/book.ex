@@ -33,7 +33,7 @@ defmodule QuoteBook.Book do
       {"message_tree", Message}
       |> recursive_ctes(true)
       |> with_cte("message_tree", as: fragment(@raw_sql_all_messages))
-      |> preload(:attachments)
+      |> preload([:attachments, :from])
 
     Repo.all(query)
     |> remake_tree()
