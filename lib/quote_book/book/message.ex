@@ -4,7 +4,9 @@ defmodule QuoteBook.Book.Message do
 
   schema "messages" do
     field :quote_id, :id
-    field :from_id, :integer
+
+    belongs_to :from, QuoteBook.Book.User
+
     field :peer_id, :integer
     field :text, :string
     field :date, :integer
