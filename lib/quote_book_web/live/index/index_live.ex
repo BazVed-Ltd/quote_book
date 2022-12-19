@@ -12,9 +12,7 @@ defmodule QuoteBookWeb.IndexLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <%= for quote_message <- @quotes do %>
-      <QuoteComponent.quote quote={quote_message} />
-    <% end %>
+    <QuoteComponent.quotes quotes={@quotes} />
     """
   end
 end
