@@ -290,7 +290,9 @@ defmodule QuoteBook.Book do
   end
 
   def insert_users(users) do
-    Enum.map(users, &User.changeset(%User{}, &1))
+    users
+    |> Stream.map(&User.changeset(%User{}, &1))
+    |> Stream.with_index()
     |> Enum.reduce(Multi.new(), fn {user, num}, multi ->
       Multi.insert(multi, num, user)
     end)
