@@ -128,7 +128,7 @@ defmodule QuoteBookWeb.QuoteComponent do
         ~H"<img class='object-scale-down w-40 h-40 align-middle' src={@attachment.path} />"
 
       _ ->
-        ~H"<span>Unknown type</span>"
+        ~H"<span><a href={@attachment.path}><%= @attachment.type %></a></span>"
     end
   end
 end
