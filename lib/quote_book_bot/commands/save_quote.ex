@@ -94,7 +94,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
 
     if not File.exists?(path) do
       # TODO: в отдельный процесс
-      Image.write(photo, file_path, quality: 100)
+      Image.write!(photo, file_path, quality: 100)
     end
 
     %{type: type, path: path}
