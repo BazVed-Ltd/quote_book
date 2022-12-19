@@ -7,14 +7,14 @@ defmodule QuoteBook.Book do
   alias Ecto.Multi
   alias QuoteBook.Repo
 
-  alias QuoteBook.Book.Message
+  alias QuoteBook.Book.{Message, User}
 
   @raw_sql_all_messages """
-  SELECT *, 0 as depth
+  SELECT *
   FROM messages
   WHERE quote_id IS NOT null
   UNION ALL
-  SELECT n.*, depth + 1
+  SELECT n.*
   FROM messages n
   INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id OR fwd.id = n.reply_message_id
   """
@@ -33,7 +33,6 @@ defmodule QuoteBook.Book do
       {"message_tree", Message}
       |> recursive_ctes(true)
       |> with_cte("message_tree", as: fragment(@raw_sql_all_messages))
-      |> select_merge([m], %{depth: m.depth})
       |> preload(:attachments)
 
     Repo.all(query)
@@ -49,11 +48,11 @@ defmodule QuoteBook.Book do
   end
 
   @raw_sql_message_tree """
-  SELECT *, 0 as depth
+  SELECT *
   FROM messages
   WHERE quote_id = ?
   UNION ALL
-  SELECT n.*, depth + 1
+  SELECT n.*
   FROM messages n
   INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id OR fwd.id = n.reply_message_id
   """
@@ -77,7 +76,6 @@ defmodule QuoteBook.Book do
       {"message_tree", Message}
       |> recursive_ctes(true)
       |> with_cte("message_tree", as: fragment(@raw_sql_message_tree, ^id))
-      |> select_merge([m], %{depth: m.depth})
       |> preload(:attachments)
 
     Repo.all(query)
@@ -279,8 +277,6 @@ defmodule QuoteBook.Book do
   def change_attachment(%Attachment{} = attachment, attrs \\ %{}) do
     Attachment.changeset(attachment, attrs)
   end
-
-  alias QuoteBook.Book.User
 
   def get_users_from_messages do
     query =

@@ -9,8 +9,6 @@ defmodule QuoteBook.Book.Message do
     field :text, :string
     field :date, :integer
 
-    field :depth, :integer, load_in_query: false
-
     field :reply_message_id, :id
     has_one :reply_message, QuoteBook.Book.Message, foreign_key: :reply_message_id
 
