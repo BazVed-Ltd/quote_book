@@ -50,7 +50,7 @@ defmodule QuoteBook.Book.Message do
       changeset
     else
       # Add the error to the first field only since Ecto requires a field name for each error.
-      add_error(changeset, hd(fields), "Одно из полей должно быть предоставлено: #{inspect(fields)}")
+      add_error(changeset, hd(fields), "Вы не прикрепили сообщения, которые должны стать цитатой")
     end
   end
 
