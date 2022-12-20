@@ -24,18 +24,38 @@ defmodule QuoteBook.Book.Message do
 
   @doc false
   def changeset(message, attrs) do
-    message
-    |> changeset_without_quote_id(attrs)
-    |> validate_required([:peer_id])
-    |> put_change(:quote_id, get_field(message, :peer_id)|> QuoteBook.Book.quotes_count())
+    changeset =
+      message
+      |> changeset_without_quote_id(attrs)
+      |> IO.inspect()
+      |> validate_required_inclusion([:reply_message, :fwd_messages])
+      |> validate_required([:peer_id])
+
+    changeset
+    |> put_change(:quote_id, get_field(changeset, :peer_id) |> QuoteBook.Book.quotes_count())
   end
 
   def changeset_without_quote_id(message, attrs) do
     message
     |> cast(attrs, [:text, :peer_id, :from_id, :date])
-    |> validate_required([:from_id, :date]) # TODO: required attachments or text
+    |> validate_required([:from_id, :date])
+    |> validate_required_inclusion([:text, :attachments])
     |> cast_assoc(:attachments)
     |> cast_assoc(:reply_message, with: &__MODULE__.changeset_without_quote_id/2)
     |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_without_quote_id/2)
+  end
+
+  defp validate_required_inclusion(changeset, fields) do
+    if Enum.any?(fields, &present?(changeset, &1)) do
+      changeset
+    else
+      # Add the error to the first field only since Ecto requires a field name for each error.
+      add_error(changeset, hd(fields), "Одно из полей должно быть предоставлено: #{inspect(fields)}")
+    end
+  end
+
+  defp present?(changeset, field) do
+    value = get_field(changeset, field)
+    value && value != "" && value != []
   end
 end
