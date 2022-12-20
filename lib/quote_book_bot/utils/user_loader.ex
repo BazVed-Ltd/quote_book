@@ -8,6 +8,7 @@ defmodule QuoteBookBot.Utils.UserLoader do
       Book.get_users_from_messages()
       |> Enum.filter(fn x -> x |> elem(1) |> is_nil() end)
       |> Enum.map(&elem(&1, 0))
+      |> Enum.reject(&(&1 < 0))
 
     get_users(users_ids)
     |> photo_100_to_curernt_photo()

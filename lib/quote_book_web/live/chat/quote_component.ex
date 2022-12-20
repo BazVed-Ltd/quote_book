@@ -73,15 +73,21 @@ defmodule QuoteBookWeb.QuoteComponent do
 
   def nested_message(assigns) do
     from = assigns.message.from
-    from_full_name = "#{from.first_name} #{from.last_name}"
-    from_url = "https://vk.com/id#{from.id}"
+
+    {from_full_name, from_url, current_photo} =
+      if is_nil(from) do
+        {"Сообщество", "https://vk.com/club0", "https://vk.com/images/camera_100.png"}
+      else
+        {"#{from.first_name} #{from.last_name}", "https://vk.com/id#{from.id}",
+         from.current_photo}
+      end
 
     nested_messages = fetch_nested_messages(assigns.message)
 
     ~H"""
     <div class="flex">
       <div class="flex-none w-11">
-        <img class="w-11 h-11 rounded-full" src={from.current_photo} />
+        <img class="w-11 h-11 rounded-full" src={current_photo} alt="Аватар"/>
       </div>
       <div class="flex-initial pl-2">
         <a class="text-blue-400" href={from_url}><%= from_full_name %></a>
