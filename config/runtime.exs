@@ -36,9 +36,9 @@ if config_env() == :prod do
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
-    config :vk_bot,
-      token: System.get_env("VK_TOKEN"),
-      group_id: System.get_env("GROUP_ID")
+  config :vk_bot, :vk_bot,
+    token: System.get_env("VK_TOKEN"),
+    group_id: System.get_env("GROUP_ID")
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
