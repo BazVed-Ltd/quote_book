@@ -7,7 +7,7 @@ defmodule QuoteBook.Book do
   alias Ecto.Multi
   alias QuoteBook.Repo
 
-  alias QuoteBook.Book.{Message, User}
+  alias QuoteBook.Book.{Message, User, Chat}
 
   @raw_sql_all_messages """
   SELECT *
@@ -44,14 +44,17 @@ defmodule QuoteBook.Book do
       from q in Message,
         where: not is_nil(q.peer_id),
         distinct: q.peer_id,
-        select: q.peer_id
+        left_join: c in Chat,
+        on: c.id == q.peer_id,
+        select: {q.peer_id, c}
 
     Repo.all(query)
   end
 
   def quotes_count(peer_id) do
-    query = from m in Message,
-              where: m.peer_id == ^peer_id
+    query =
+      from m in Message,
+        where: m.peer_id == ^peer_id
 
     Repo.aggregate(query, :count, :quote_id)
   end
@@ -411,5 +414,99 @@ defmodule QuoteBook.Book do
   """
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
+  end
+
+  @doc """
+  Gets a single chat.
+
+  Raises `Ecto.NoResultsError` if the Chat does not exist.
+
+  ## Examples
+
+      iex> get_chat!(123)
+      %Chat{}
+
+      iex> get_chat!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_chat!(id), do: Repo.get!(Chat, id)
+
+  def get_or_new_chat(id) do
+    case Repo.get(Chat, id) do
+      nil -> %Chat{}
+      chat -> chat
+    end
+  end
+
+  @doc """
+  Creates a chat.
+
+  ## Examples
+
+      iex> create_chat(%{field: value})
+      {:ok, %Chat{}}
+
+      iex> create_chat(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_chat(attrs \\ %{}) do
+    %Chat{}
+    |> Chat.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def create_or_update_chat(chat, attrs \\ %{}) do
+    chat
+    |> Chat.changeset(attrs)
+    |> Repo.insert_or_update()
+  end
+
+  @doc """
+  Updates a chat.
+
+  ## Examples
+
+      iex> update_chat(chat, %{field: new_value})
+      {:ok, %Chat{}}
+
+      iex> update_chat(chat, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_chat(%Chat{} = chat, attrs) do
+    chat
+    |> Chat.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a chat.
+
+  ## Examples
+
+      iex> delete_chat(chat)
+      {:ok, %Chat{}}
+
+      iex> delete_chat(chat)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_chat(%Chat{} = chat) do
+    Repo.delete(chat)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking chat changes.
+
+  ## Examples
+
+      iex> change_chat(chat)
+      %Ecto.Changeset{data: %Chat{}}
+
+  """
+  def change_chat(%Chat{} = chat, attrs \\ %{}) do
+    Chat.changeset(chat, attrs)
   end
 end

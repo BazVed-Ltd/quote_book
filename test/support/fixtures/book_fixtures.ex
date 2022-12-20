@@ -34,4 +34,18 @@ defmodule QuoteBook.BookFixtures do
 
     attachment
   end
+
+  @doc """
+  Generate a chat.
+  """
+  def chat_fixture(attrs \\ %{}) do
+    {:ok, chat} =
+      attrs
+      |> Enum.into(%{
+        title: "some title"
+      })
+      |> QuoteBook.Book.create_chat()
+
+    chat
+  end
 end

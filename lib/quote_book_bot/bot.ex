@@ -4,6 +4,7 @@ defmodule QuoteBookBot.Bot do
   alias QuoteBookBot.Commands
 
   defcommands [
-    Commands.SaveQuote
+    Commands.SaveQuote,
+    Commands.SaveChatName
   ]
 end

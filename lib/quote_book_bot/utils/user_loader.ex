@@ -1,6 +1,8 @@
 defmodule QuoteBookBot.Utils.UserLoader do
   alias QuoteBook.Book
 
+  # TODO: Лучше скачивать аватарки
+  # TODO: Добавить поддержку сообществ
   def insert_new_users_data_to_db() do
     users_ids =
       Book.get_users_from_messages()
