@@ -17,7 +17,9 @@ defmodule QuoteBook.Application do
       # Start the Endpoint (http/https)
       QuoteBookWeb.Endpoint,
       # Start the VK bot
-      QuoteBookBot.Bot
+      QuoteBookBot.Bot,
+      # Start cron
+      QuoteBook.Scheduler
       # Start a worker by calling: QuoteBook.Worker.start_link(arg)
       # {QuoteBook.Worker, arg}
     ]

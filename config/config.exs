@@ -56,6 +56,12 @@ config :tailwind, version: "3.2.4", default: [
   cd: Path.expand("../assets", __DIR__)
 ]
 
+config :quote_book, QuoteBook.Scheduler,
+  jobs: [
+    # Runs every six hours
+    {"0 */6 * * *", &QuoteBookBot.Utils.UserLoader.update_exists_users/0},
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
