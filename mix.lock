@@ -48,4 +48,5 @@
   "telemetry_poller": {:hex, :telemetry_poller, "1.0.0", "db91bb424e07f2bb6e73926fcafbfcbcb295f0193e0a00e825e589a0a47e8453", [:rebar3], [{:telemetry, "~> 1.0", [hex: :telemetry, repo: "hexpm", optional: false]}], "hexpm", "b3a24eafd66c3f42da30fc3ca7dda1e9d546c12250a2d60d7b81d264fbec4f6e"},
   "unicode_util_compat": {:hex, :unicode_util_compat, "0.7.0", "bc84380c9ab48177092f43ac89e4dfa2c6d62b40b8bd132b1059ecc7232f9a78", [:rebar3], [], "hexpm", "25eee6d67df61960cf6a794239566599b09e17e668d3700247bc498638152521"},
   "vix": {:hex, :vix, "0.15.1", "e8e32feed02659f4a7bde3877dcd96eb64c685dd09597045be95966845a7a405", [:make, :mix], [{:elixir_make, "~> 0.6", [hex: :elixir_make, repo: "hexpm", optional: false]}, {:kino, "~> 0.7", [hex: :kino, repo: "hexpm", optional: true]}], "hexpm", "e3a132598e97bac04f96de98072baa621264afbabbf6f4031dc7eb373e627e8b"},
+  "vk_bot": {:git, "https://github.com/waika28/vk_bot.git", "4f3e8d4612eead20df904e89ebb9cfd3d63a69f5", []},
 }

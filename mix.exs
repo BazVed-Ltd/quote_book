@@ -51,7 +51,7 @@ defmodule QuoteBook.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:image, "~> 0.14.0"},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
-      {:vk_bot, path: "../vk_bot"},
+      {:vk_bot, github: "waika28/vk_bot"},
     ]
   end
 

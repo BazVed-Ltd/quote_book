@@ -25,6 +25,9 @@ quote_book-*.tar
 # Ignore assets that are produced by build tools.
 /priv/static/assets/
 
+# Secrets
+config/*.secret.exs
+
 # Ignore downloaded attachments
 /priv/static/attachments
 
