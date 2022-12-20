@@ -12,7 +12,7 @@ defmodule QuoteBook.Book do
   @raw_sql_all_messages """
   SELECT *
   FROM messages
-  WHERE quote_id IS NOT null
+  WHERE quote_id IS NOT null AND peer_id = ?
   UNION ALL
   SELECT n.*
   FROM messages n
@@ -28,23 +28,32 @@ defmodule QuoteBook.Book do
       [%Message{}, ...]
 
   """
-  def list_quotes do
+  def list_quotes(peer_id) do
     query =
       {"message_tree", Message}
       |> recursive_ctes(true)
-      |> with_cte("message_tree", as: fragment(@raw_sql_all_messages))
+      |> with_cte("message_tree", as: fragment(@raw_sql_all_messages, ^peer_id))
       |> preload([:attachments, :from])
 
     Repo.all(query)
     |> remake_tree()
   end
 
-  def quotes_count do
+  def list_chats() do
     query =
-      from m in Message,
-        where: is_nil(m.fwd_from_message_id)
+      from q in Message,
+        where: not is_nil(q.peer_id),
+        distinct: q.peer_id,
+        select: q.peer_id
 
-    Repo.aggregate(query, :count, :id)
+    Repo.all(query)
+  end
+
+  def quotes_count(peer_id) do
+    query = from m in Message,
+              where: m.peer_id == ^peer_id
+
+    Repo.aggregate(query, :count, :quote_id)
   end
 
   @raw_sql_message_tree """

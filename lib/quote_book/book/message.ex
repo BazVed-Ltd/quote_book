@@ -26,7 +26,8 @@ defmodule QuoteBook.Book.Message do
   def changeset(message, attrs) do
     message
     |> changeset_without_quote_id(attrs)
-    |> put_change(:quote_id, QuoteBook.Book.quotes_count())
+    |> validate_required([:peer_id])
+    |> put_change(:quote_id, get_field(message, :peer_id)|> QuoteBook.Book.quotes_count())
   end
 
   def changeset_without_quote_id(message, attrs) do

@@ -18,6 +18,7 @@ defmodule QuoteBookWeb.Router do
     pipe_through :browser
 
     live "/", IndexLive
+    live "/:peer_id", ChatLive
   end
 
   # Other scopes may use custom stacks.
