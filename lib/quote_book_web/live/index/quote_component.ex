@@ -27,7 +27,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     ~H"""
     <div class='card mb-5'>
       <div class='flex border-b border-zinc-700 pb-2 mb-3'>
-        <div>#<%= @quote.id %></div>
+        <div>#<%= @quote.quote_id %></div>
         <div class='ml-auto'>
           <%= date %>
         </div>
