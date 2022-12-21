@@ -35,7 +35,6 @@ defmodule QuoteBookBot.Utils.Attachments do
     file_path = Path.join(["priv", "static", path])
 
     if not File.exists?(path) do
-      # TODO: в отдельный процесс
       Image.write!(photo, file_path, quality: 100)
     end
 
@@ -58,7 +57,6 @@ defmodule QuoteBookBot.Utils.Attachments do
     file_path = Path.join(["priv", "static", path])
 
     if not File.exists?(path) do
-      # TODO: в отдельный процесс
       File.write!(file_path, doc)
     end
 
