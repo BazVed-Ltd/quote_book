@@ -52,6 +52,7 @@ defmodule QuoteBook.MixProject do
       {:image, "~> 0.14.0"},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {:quantum, "~> 3.0"},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:vk_bot, github: "waika28/vk_bot"},
     ]
   end
