@@ -23,9 +23,10 @@ defmodule QuoteBookBot.Utils.Attachments do
     photo = Image.open!(binary_attachment)
 
     hash =
-      photo
-      |> Image.dhash()
-      |> elem(1)
+      binary_attachment
+      |> BitstringExtensions.chunks(2048)
+      |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
+      |> :crypto.hash_final()
       |> Base.encode16()
       |> String.downcase()
 
@@ -35,7 +36,7 @@ defmodule QuoteBookBot.Utils.Attachments do
     file_path = Path.join(["priv", "static", path])
 
     if not File.exists?(path) do
-      Image.write!(photo, file_path, quality: 100)
+      Image.write!(photo, file_path)
     end
 
     %{type: type, path: path}
