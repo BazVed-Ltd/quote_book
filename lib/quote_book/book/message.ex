@@ -27,7 +27,9 @@ defmodule QuoteBook.Book.Message do
     changeset =
       message
       |> changeset_without_quote_id(attrs)
-      |> validate_required_inclusion([:reply_message, :fwd_messages])
+      |> validate_required_inclusion([:reply_message, :fwd_messages],
+        error_message: "Вы не прикрепили сообщения, которые должны стать цитатой"
+      )
       |> validate_required([:peer_id])
 
     changeset
@@ -44,12 +46,15 @@ defmodule QuoteBook.Book.Message do
     |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_without_quote_id/2)
   end
 
-  defp validate_required_inclusion(changeset, fields) do
+  defp validate_required_inclusion(changeset, fields, opts \\ []) do
+    error_message =
+      Keyword.get(opts, :error_message, "Required at least one of these fields: #{inspect(fields)}")
+
     if Enum.any?(fields, &present?(changeset, &1)) do
       changeset
     else
       # Add the error to the first field only since Ecto requires a field name for each error.
-      add_error(changeset, hd(fields), "Вы не прикрепили сообщения, которые должны стать цитатой")
+      add_error(changeset, hd(fields), error_message)
     end
   end
 
