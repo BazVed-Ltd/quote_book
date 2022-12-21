@@ -40,8 +40,8 @@ defmodule QuoteBook.Book.Message do
     message
     |> cast(attrs, [:text, :peer_id, :from_id, :date])
     |> validate_required([:from_id, :date])
-    |> validate_required_inclusion([:text, :attachments])
     |> cast_assoc(:attachments)
+    |> validate_required_inclusion([:text, :attachments])
     |> cast_assoc(:reply_message, with: &__MODULE__.changeset_without_quote_id/2)
     |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_without_quote_id/2)
   end
