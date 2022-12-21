@@ -17,20 +17,22 @@ defmodule QuoteBookWeb.QuoteComponent do
   end
 
   def quote(assigns) do
-    date = Calendar.strftime(assigns.quote.inserted_at, "%x %H:%M")
     nested_messages = fetch_nested_messages(assigns.quote)
 
     author = assigns.quote.from
     author_full_name = "#{author.first_name} #{author.last_name}"
     author_url = "https://vk.com/id#{author.id}"
 
+    date =
+      assigns.quote.inserted_at
+      |> DateTime.from_naive!("Etc/UTC")
+      |> DateTime.to_unix()
+
     ~H"""
     <div class='card mb-5'>
       <div class='flex border-b border-zinc-700 pb-2 mb-3'>
         <div>#<%= @quote.quote_id %></div>
-        <div class='ml-auto'>
-          <%= date %>
-        </div>
+        <div id="#{author.id}-date" class='ml-auto' phx-hook="setTime" data-timestamp={date}></div>
       </div>
 
       <div>
