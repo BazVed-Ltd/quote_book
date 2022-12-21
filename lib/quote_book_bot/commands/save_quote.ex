@@ -20,8 +20,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
           changeset.errors
           |> Enum.into(%{})
           |> Map.values()
-          |> Enum.map(&elem(&1, 0))
-          |> Enum.join("\n")
+          |> Enum.map_join("\n", &elem(&1, 0))
 
         {:ok, error}
     end
