@@ -27,7 +27,6 @@ defmodule QuoteBook.Book.Message do
     changeset =
       message
       |> changeset_without_quote_id(attrs)
-      |> IO.inspect()
       |> validate_required_inclusion([:reply_message, :fwd_messages])
       |> validate_required([:peer_id])
 
