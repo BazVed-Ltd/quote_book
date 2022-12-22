@@ -32,7 +32,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     <div class='card mb-5'>
       <div class='flex border-b border-zinc-700 pb-2 mb-3'>
         <div>#<%= @quote.quote_id %></div>
-        <div id="#{author.id}-date" class='ml-auto' phx-hook="setTime" data-timestamp={date}></div>
+        <div id={"#{@quote.quote_id}-date"} class='ml-auto' phx-hook="setTime" data-timestamp={date}></div>
       </div>
 
       <div>
