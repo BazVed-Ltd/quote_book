@@ -93,6 +93,8 @@ defmodule QuoteBookWeb.QuoteComponent do
       </div>
       <div class="flex-initial pl-2">
         <a class="text-blue-400" href={from_url}><%= from_full_name %></a>
+        <span id={"#{@message.id}-time"} phx-hook="setTime" data-time-only="true" data-timestamp={@message.date} class="text-gray-500">
+        </span>
 
         <%= unless is_nil(@message.text) do %>
           <p class='mb-4 last:mb-0'><%= @message.text %></p>
