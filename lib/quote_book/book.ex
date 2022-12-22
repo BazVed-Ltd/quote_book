@@ -510,7 +510,6 @@ defmodule QuoteBook.Book do
         %Chat{covers: nil} = chat -> Chat.changeset(chat, %{covers: [cover_path]})
         %Chat{covers: covers} = chat -> Chat.changeset(chat, %{covers: [cover_path | covers]})
       end
-      |> IO.inspect()
 
     chat = Map.update(chat, :covers, [cover_path], &[cover_path | &1])
 
