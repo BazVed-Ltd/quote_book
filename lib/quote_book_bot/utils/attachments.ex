@@ -1,5 +1,4 @@
 defmodule QuoteBookBot.Utils.Attachments do
-
   alias QuoteBookBot.Utils.{MapExtensions, BitstringExtensions}
 
   def insert_attachments(nil), do: nil
@@ -8,14 +7,21 @@ defmodule QuoteBookBot.Utils.Attachments do
     message
     |> Map.update!("attachments", &load_attachments/1)
     |> MapExtensions.update_or_nothing("reply_message", &insert_attachments/1)
-    |> MapExtensions.update_or_nothing("fwd_messages", fn m -> Enum.map(m, &insert_attachments/1) end)
+    |> MapExtensions.update_or_nothing("fwd_messages", fn m ->
+      Enum.map(m, &insert_attachments/1)
+    end)
   end
 
-  defp load_attachments(attachments) do
+  def load_attachments(attachments) do
     attachments
-    |> Stream.map(&VkBot.Attachment.new/1)
-    |> Stream.map(&VkBot.Attachment.download/1)
-    |> Enum.map(&save_attachment/1)
+    |> Enum.map(&load_attachment/1)
+  end
+
+  def load_attachment(attachment) do
+    attachment
+    |> VkBot.Attachment.new()
+    |> VkBot.Attachment.download()
+    |> save_attachment()
   end
 
   defp save_attachment(%VkBot.Attachment{file: binary_attachment, type: type})
