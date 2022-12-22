@@ -30,15 +30,19 @@ let Hooks = {};
 Hooks.setTime = {
   mounted() {
     timestamp = this.el.getAttribute("data-timestamp") * 1000
+    timeOnly = Boolean(this.el.getAttribute("data-time-only"))
 
     const date = new Date(timestamp);
 
     const timeZone   = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (timeOnly) {
+      this.el.innerText = date.toLocaleString("ru-RU", {timeZone, dateStyle: undefined, timeStyle: "short"});
+    } else {
+      const fmtDate = date.toLocaleString("ru-RU", {timeZone, dateStyle: "short", timeStyle: undefined});
+      const fmtTime = date.toLocaleString("ru-RU", {timeZone, dateStyle: undefined, timeStyle: "short"});
 
-    const fmtDate = date.toLocaleString("ru-RU", {timeZone, dateStyle: "short", timeStyle: undefined});
-    const fmtTime = date.toLocaleString("ru-RU", {timeZone, dateStyle: undefined, timeStyle: "short"});
-
-    this.el.innerText = `${fmtDate} в ${fmtTime}`
+      this.el.innerText = `${fmtDate} в ${fmtTime}`
+    }
   },
   updated() {
     this.mounted()
