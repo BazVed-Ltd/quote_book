@@ -39,6 +39,9 @@ Hooks.setTime = {
     const fmtTime = date.toLocaleString("ru-RU", {timeZone, dateStyle: undefined, timeStyle: "short"});
 
     this.el.innerText = `${fmtDate} в ${fmtTime}`
+  },
+  updated() {
+    this.mounted()
   }
 }
 
