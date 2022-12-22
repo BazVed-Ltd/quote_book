@@ -13,7 +13,6 @@ defmodule QuoteBookWeb.ChatLive do
 
     quotes = Book.list_quotes(peer_id)
 
-    # FIXME: Если чат не занесён в бд, то всё ломается
     chat = Book.get_chat!(peer_id)
 
     Process.send_after(self(), :next_cover, Enum.random(2..6) * 1000)
