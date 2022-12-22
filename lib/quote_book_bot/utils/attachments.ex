@@ -1,5 +1,4 @@
 defmodule QuoteBookBot.Utils.Attachments do
-
   alias QuoteBookBot.Utils.{MapExtensions, BitstringExtensions}
 
   def insert_attachments(nil), do: nil
@@ -8,14 +7,21 @@ defmodule QuoteBookBot.Utils.Attachments do
     message
     |> Map.update!("attachments", &load_attachments/1)
     |> MapExtensions.update_or_nothing("reply_message", &insert_attachments/1)
-    |> MapExtensions.update_or_nothing("fwd_messages", fn m -> Enum.map(m, &insert_attachments/1) end)
+    |> MapExtensions.update_or_nothing("fwd_messages", fn m ->
+      Enum.map(m, &insert_attachments/1)
+    end)
   end
 
-  defp load_attachments(attachments) do
+  def load_attachments(attachments) do
     attachments
-    |> Stream.map(&VkBot.Attachment.new/1)
-    |> Stream.map(&VkBot.Attachment.download/1)
-    |> Enum.map(&save_attachment/1)
+    |> Enum.map(&load_attachment/1)
+  end
+
+  def load_attachment(attachment) do
+    attachment
+    |> VkBot.Attachment.new(gif_as_mp4: true)
+    |> VkBot.Attachment.download()
+    |> save_attachment()
   end
 
   defp save_attachment(%VkBot.Attachment{file: binary_attachment, type: type})
@@ -23,9 +29,10 @@ defmodule QuoteBookBot.Utils.Attachments do
     photo = Image.open!(binary_attachment)
 
     hash =
-      photo
-      |> Image.dhash()
-      |> elem(1)
+      binary_attachment
+      |> BitstringExtensions.chunks(2048)
+      |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
+      |> :crypto.hash_final()
       |> Base.encode16()
       |> String.downcase()
 
@@ -35,8 +42,7 @@ defmodule QuoteBookBot.Utils.Attachments do
     file_path = Path.join(["priv", "static", path])
 
     if not File.exists?(path) do
-      # TODO: в отдельный процесс
-      Image.write!(photo, file_path, quality: 100)
+      Image.write!(photo, file_path)
     end
 
     %{type: type, path: path}
@@ -58,7 +64,6 @@ defmodule QuoteBookBot.Utils.Attachments do
     file_path = Path.join(["priv", "static", path])
 
     if not File.exists?(path) do
-      # TODO: в отдельный процесс
       File.write!(file_path, doc)
     end
 

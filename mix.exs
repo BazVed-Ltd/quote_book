@@ -4,7 +4,7 @@ defmodule QuoteBook.MixProject do
   def project do
     [
       app: :quote_book,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -52,6 +52,8 @@ defmodule QuoteBook.MixProject do
       {:image, "~> 0.14.0"},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {:quantum, "~> 3.0"},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:vk_bot, github: "waika28/vk_bot"},
     ]
   end

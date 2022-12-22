@@ -4,6 +4,7 @@ defmodule QuoteBook.Book.Chat do
 
   schema "chats" do
     field :title, :string
+    field :covers, {:array, :string}, default: []
 
     timestamps()
   end
@@ -11,7 +12,7 @@ defmodule QuoteBook.Book.Chat do
   @doc false
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [:id, :title])
-    |> validate_required([:id, :title])
+    |> cast(attrs, [:id, :title, :covers])
+    |> validate_required([:id])
   end
 end

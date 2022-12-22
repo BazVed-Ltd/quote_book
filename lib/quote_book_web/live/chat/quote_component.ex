@@ -32,10 +32,10 @@ defmodule QuoteBookWeb.QuoteComponent do
     <div class='card mb-5'>
       <div class='flex border-b border-zinc-700 pb-2 mb-3'>
         <div>#<%= @quote.quote_id %></div>
-        <div id="#{author.id}-date" class='ml-auto' phx-hook="setTime" data-timestamp={date}></div>
+        <div id={"#{@quote.quote_id}-date"} class='ml-auto' phx-hook="setTime" data-timestamp={date}></div>
       </div>
 
-      <div>
+      <div class="mb-3">
         <QuoteComponent.nested_messages messages={nested_messages} />
       </div>
 
@@ -93,6 +93,8 @@ defmodule QuoteBookWeb.QuoteComponent do
       </div>
       <div class="flex-initial pl-2">
         <a class="text-blue-400" href={from_url}><%= from_full_name %></a>
+        <span id={"#{@message.id}-time"} phx-hook="setTime" data-time-only="true" data-timestamp={@message.date} class="text-gray-500">
+        </span>
 
         <%= unless is_nil(@message.text) do %>
           <p class='mb-4 last:mb-0'><%= @message.text %></p>
@@ -129,6 +131,13 @@ defmodule QuoteBookWeb.QuoteComponent do
 
   def attachment(assigns) do
     case assigns.attachment.type do
+      :doc when assigns.attachment.ext == "mp4" ->
+        ~H"""
+        <video autoplay loop muted>
+          <source src={@attachment.path} type="video/mp4" />Your browser does not support the video tag.
+        </video>
+        """
+
       type when type in ~w(photo doc graffiti)a ->
         ~H"<img class='object-scale-down w-full h-full align-middle' src={@attachment.path} />"
 

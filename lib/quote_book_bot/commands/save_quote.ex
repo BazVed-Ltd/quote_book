@@ -13,6 +13,8 @@ defmodule QuoteBookBot.Commands.SaveQuote do
     case QuoteBook.Book.create_quote_from_message(message) do
       {:ok, q} ->
         UserLoader.insert_new_users_data_to_db()
+        chat = QuoteBook.Book.get_or_new_chat(message["peer_id"])
+        QuoteBook.Book.create_or_update_chat(chat, %{})
         {:ok, Integer.to_string(q.quote_id)}
 
       {:error, changeset} ->
@@ -20,8 +22,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
           changeset.errors
           |> Enum.into(%{})
           |> Map.values()
-          |> Enum.map(&elem(&1, 0))
-          |> Enum.join("\n")
+          |> Enum.map_join("\n", &elem(&1, 0))
 
         {:ok, error}
     end
