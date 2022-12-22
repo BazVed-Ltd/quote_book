@@ -4,7 +4,7 @@ defmodule QuoteBook.MixProject do
   def project do
     [
       app: :quote_book,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
