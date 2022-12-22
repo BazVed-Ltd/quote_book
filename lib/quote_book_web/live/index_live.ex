@@ -17,8 +17,8 @@ defmodule QuoteBookWeb.IndexLive do
         <div class='card mx-auto px-9'>
           <h2 class='text-center text-xl mb-4'>Каналы:</h2>
           <ul>
-            <%= for {id, chat} <- @chats do %>
-              <li><%= live_redirect (if is_nil(chat) do id else chat.title end), to: Routes.live_path(@socket, ChatLive, id) %></li>
+            <%= for chat <- @chats do %>
+              <li><%= live_redirect (if is_nil(chat.title) do chat.id else chat.title end), to: Routes.live_path(@socket, ChatLive, chat.id) %></li>
             <% end %>
           </ul>
         </div>

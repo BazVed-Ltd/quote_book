@@ -13,6 +13,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
     case QuoteBook.Book.create_quote_from_message(message) do
       {:ok, q} ->
         UserLoader.insert_new_users_data_to_db()
+        QuoteBook.Book.create_chat!(%{id: message["peer_id"]})
         {:ok, Integer.to_string(q.quote_id)}
 
       {:error, changeset} ->

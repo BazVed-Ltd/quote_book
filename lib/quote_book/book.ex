@@ -41,15 +41,7 @@ defmodule QuoteBook.Book do
   end
 
   def list_chats() do
-    query =
-      from q in Message,
-        where: not is_nil(q.peer_id),
-        distinct: q.peer_id,
-        left_join: c in Chat,
-        on: c.id == q.peer_id,
-        select: {q.peer_id, c}
-
-    Repo.all(query)
+    Repo.all(Chat)
   end
 
   def quotes_count(peer_id) do
@@ -452,10 +444,10 @@ defmodule QuoteBook.Book do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_chat(attrs \\ %{}) do
+  def create_chat!(attrs \\ %{}) do
     %Chat{}
     |> Chat.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert!()
   end
 
   def create_or_update_chat(chat, attrs \\ %{}) do
@@ -509,5 +501,19 @@ defmodule QuoteBook.Book do
   """
   def change_chat(%Chat{} = chat, attrs \\ %{}) do
     Chat.changeset(chat, attrs)
+  end
+
+  def append_chat_cover(chat_id, cover_path) do
+    chat =
+      case Repo.get(Chat, chat_id) do
+        nil -> Chat.changeset(%Chat{}, %{id: chat_id})
+        %Chat{covers: nil} = chat -> Chat.changeset(chat, %{covers: [cover_path]})
+        %Chat{covers: covers} = chat -> Chat.changeset(chat, %{covers: [cover_path | covers]})
+      end
+      |> IO.inspect()
+
+    chat = Map.update(chat, :covers, [cover_path], &[cover_path | &1])
+
+    Repo.insert_or_update(chat)
   end
 end
