@@ -19,7 +19,7 @@ defmodule QuoteBookBot.Utils.Attachments do
 
   def load_attachment(attachment) do
     attachment
-    |> VkBot.Attachment.new()
+    |> VkBot.Attachment.new(gif_as_mp4: true)
     |> VkBot.Attachment.download()
     |> save_attachment()
   end

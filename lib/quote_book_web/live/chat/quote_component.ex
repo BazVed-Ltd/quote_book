@@ -129,6 +129,13 @@ defmodule QuoteBookWeb.QuoteComponent do
 
   def attachment(assigns) do
     case assigns.attachment.type do
+      :doc when assigns.attachment.ext == "mp4" ->
+        ~H"""
+        <video autoplay loop muted>
+          <source src={@attachment.path} type="video/mp4" />Your browser does not support the video tag.
+        </video>
+        """
+
       type when type in ~w(photo doc graffiti)a ->
         ~H"<img class='object-scale-down w-full h-full align-middle' src={@attachment.path} />"
 
