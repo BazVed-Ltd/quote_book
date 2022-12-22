@@ -34,10 +34,10 @@ defmodule QuoteBook.Book do
       |> recursive_ctes(true)
       |> with_cte("message_tree", as: fragment(@raw_sql_all_messages, ^peer_id))
       |> preload([:attachments, :from])
-      |> reverse_order()
 
     Repo.all(query)
     |> remake_tree()
+    |> Enum.reverse()
   end
 
   def list_chats() do
