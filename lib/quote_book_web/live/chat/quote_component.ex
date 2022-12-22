@@ -35,7 +35,7 @@ defmodule QuoteBookWeb.QuoteComponent do
         <div id={"#{@quote.quote_id}-date"} class='ml-auto' phx-hook="setTime" data-timestamp={date}></div>
       </div>
 
-      <div>
+      <div class="mb-3">
         <QuoteComponent.nested_messages messages={nested_messages} />
       </div>
 
