@@ -134,7 +134,8 @@ defmodule QuoteBookWeb.QuoteComponent do
       :doc when assigns.attachment.ext == "mp4" ->
         ~H"""
         <video autoplay loop muted>
-          <source src={@attachment.path} type="video/mp4" />Your browser does not support the video tag.
+          <source src={@attachment.path} type="video/mp4" />
+          Ваш браузер не поддерживает HTML5 аудио.
         </video>
         """
 
@@ -143,6 +144,14 @@ defmodule QuoteBookWeb.QuoteComponent do
 
       :sticker ->
         ~H"<img class='object-scale-down w-40 h-40 align-middle' src={@attachment.path} />"
+
+      :audio_message ->
+        ~H"""
+        <audio controls>
+          <source src={@attachment.path} type="audio/mpeg">
+          <p>Ваш браузер не поддерживает HTML5 аудио.</p>
+        </audio>
+        """
 
       _ ->
         ~H"<span><a href={@attachment.path}><%= @attachment.type %></a></span>"
