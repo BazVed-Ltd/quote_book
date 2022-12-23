@@ -427,7 +427,7 @@ defmodule QuoteBook.Book do
 
   def get_or_new_chat(id) do
     case Repo.get(Chat, id) do
-      nil -> %Chat{}
+      nil -> %Chat{id: id}
       chat -> chat
     end
   end
