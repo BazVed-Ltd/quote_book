@@ -65,10 +65,11 @@ services:
       SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
       VK_TOKEN: "${VK_TOKEN}"
       GROUP_ID: "${GROUP_ID}"
+      ATTACHMENTS_DIRECTORY: "/app/attachments"
     ports:
       - ${PORT}:4000
     volumes:
-      - attachments:/app/priv/static/attachments
+      - attachments:/app/attachments
 
 volumes:
   postgres:
