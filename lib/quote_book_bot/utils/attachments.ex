@@ -39,7 +39,7 @@ defmodule QuoteBookBot.Utils.Attachments do
     name = hash <> ".webp"
 
     path = Path.join(["attachments", name])
-    file_path = Path.join(["priv", "static", path])
+    file_path = Path.join([Application.get_env(:quote_book, :attachments_directory), name])
 
     if not File.exists?(path) do
       Image.write!(photo, file_path)
@@ -61,7 +61,7 @@ defmodule QuoteBookBot.Utils.Attachments do
     name = hash <> ".#{ext}"
 
     path = Path.join(["attachments", name])
-    file_path = Path.join(["priv", "static", path])
+    file_path = Path.join([Application.get_env(:quote_book, :attachments_directory), name])
 
     if not File.exists?(path) do
       File.write!(file_path, doc)
