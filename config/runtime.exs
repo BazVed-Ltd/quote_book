@@ -40,7 +40,7 @@ if config_env() == :prod do
     token: System.get_env("VK_TOKEN"),
     group_id: System.get_env("GROUP_ID")
 
-    config :qutoe_book,
+    config :quote_book,
       attachments_directory: System.get_env("ATTACHMENTS_DIRECTORY")
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
