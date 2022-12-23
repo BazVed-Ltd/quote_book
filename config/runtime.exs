@@ -36,9 +36,8 @@ if config_env() == :prod do
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 
-  config :vk_bot, :vk_bot,
-    token: System.get_env("VK_TOKEN"),
-    group_id: System.get_env("GROUP_ID")
+  config :vk_bot,
+    token: System.get_env("VK_TOKEN")
 
     config :quote_book,
       attachments_directory: System.get_env("ATTACHMENTS_DIRECTORY")
