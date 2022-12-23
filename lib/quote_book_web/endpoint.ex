@@ -20,7 +20,11 @@ defmodule QuoteBookWeb.Endpoint do
     at: "/",
     from: :quote_book,
     gzip: false,
-    only: ~w(attachments assets fonts images favicon.ico robots.txt)
+    only: ~w(assets fonts images favicon.ico robots.txt)
+
+  plug Plug.Static,
+    at: "/attachments",
+    from: Application.get_env(:quote_book, :attachments_directory)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
