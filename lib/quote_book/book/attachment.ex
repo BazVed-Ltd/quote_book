@@ -6,7 +6,7 @@ defmodule QuoteBook.Book.Attachment do
     field :message_id, :id
 
     field :path, :string
-    field :type, Ecto.Enum, values: [:photo, :video, :audio, :doc, :link, :market, :market_album, :wall, :wall_reply, :sticker, :gift]
+    field :type, Ecto.Enum, values: [:photo, :video, :audio, :audio_message, :doc, :link, :market, :market_album, :wall, :wall_reply, :sticker, :gift]
     field :ext, :string
 
     timestamps()
