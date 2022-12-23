@@ -24,7 +24,11 @@ defmodule QuoteBookBot.Commands.SaveQuote do
           |> Map.values()
           |> Enum.map_join("\n", &elem(&1, 0))
 
-        {:ok, error}
+        if error != "" do
+          {:ok, error}
+        else
+          {:ok, "Неизвестная ошибка. Сбрасываю ядерную боеголовку на разработчика"}
+        end
     end
   end
 end
