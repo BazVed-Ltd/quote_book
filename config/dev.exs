@@ -75,7 +75,4 @@ config :phoenix, :stacktrace_depth, 20
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
 
-config :quote_book,
-   attachments_directory: "priv/static/attachments"
-
 import_config "#{Mix.env}.secret.exs"

@@ -1,6 +1,8 @@
 defmodule QuoteBookBot.Utils.Attachments do
   alias QuoteBookBot.Utils.{MapExtensions, BitstringExtensions}
 
+  @attachments_dir Application.compile_env!(:quote_book, :attachments_directory)
+
   def insert_attachments(nil), do: nil
 
   def insert_attachments(message) do
@@ -39,7 +41,7 @@ defmodule QuoteBookBot.Utils.Attachments do
     name = hash <> ".webp"
 
     path = Path.join(["attachments", name])
-    file_path = Path.join([Application.get_env(:quote_book, :attachments_directory), name])
+    file_path = Path.join([@attachments_dir, name])
 
     if not File.exists?(path) do
       Image.write!(photo, file_path)
@@ -61,7 +63,7 @@ defmodule QuoteBookBot.Utils.Attachments do
     name = hash <> ".#{ext}"
 
     path = Path.join(["attachments", name])
-    file_path = Path.join([Application.get_env(:quote_book, :attachments_directory), name])
+    file_path = Path.join([@attachments_dir, name])
 
     if not File.exists?(path) do
       File.write!(file_path, doc)

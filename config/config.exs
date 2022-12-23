@@ -62,6 +62,9 @@ config :quote_book, QuoteBook.Scheduler,
     {"0 */6 * * *", &QuoteBookBot.Utils.UserLoader.update_exists_users/0},
   ]
 
+config :quote_book,
+  attachments_directory: "priv/static/attachments"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
