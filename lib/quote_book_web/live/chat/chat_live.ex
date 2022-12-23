@@ -43,7 +43,13 @@ defmodule QuoteBookWeb.ChatLive do
     <% end %>
     <%= if @cover_to_show != [] do %>
       <div class="mt-5 h-80">
-          <img class="mx-auto h-full" src={List.first(@cover_to_show)} />
+          <%= if String.ends_with?(List.first(@cover_to_show), "mp4") do %>
+            <video class="mx-auto h-full" autoplay loop muted>
+              <source src={List.first(@cover_to_show)} type="video/mp4" />Your browser does not support the video tag.
+            </video>
+          <% else %>
+            <img class="mx-auto h-full" src={List.first(@cover_to_show)} />
+          <% end %>
       </div>
     <% end %>
     <div class="mt-5">
