@@ -40,6 +40,7 @@ defmodule QuoteBook.Book.Message do
     message
     |> cast(attrs, [:text, :peer_id, :from_id, :date])
     |> validate_required([:from_id, :date])
+    |> cast_from_id_by_type()
     |> cast_assoc(:attachments)
     |> validate_required_inclusion([:text, :attachments])
     |> cast_assoc(:reply_message, with: &__MODULE__.changeset_without_quote_id/2)
@@ -61,5 +62,15 @@ defmodule QuoteBook.Book.Message do
   defp present?(changeset, field) do
     value = get_field(changeset, field)
     value && value != "" && value != []
+  end
+
+  defp cast_from_id_by_type(user) do
+    id = get_change(user, :from_id)
+
+    if id < 0 do
+      put_change(user, :from_id, -id + 2_000_000_000)
+    else
+      user
+    end
   end
 end

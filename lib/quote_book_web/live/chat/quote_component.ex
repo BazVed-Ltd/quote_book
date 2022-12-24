@@ -20,7 +20,6 @@ defmodule QuoteBookWeb.QuoteComponent do
     nested_messages = fetch_nested_messages(assigns.quote)
 
     author = assigns.quote.from
-    author_full_name = "#{author.first_name} #{author.last_name}"
     author_url = "https://vk.com/id#{author.id}"
 
     date =
@@ -41,7 +40,7 @@ defmodule QuoteBookWeb.QuoteComponent do
 
       <div class='flex'>
         <div class='ml-auto'>
-          Схоронил <a class='text-blue-400' href={author_url}><%= author_full_name %></a>
+          Схоронил <a class='text-blue-400' href={author_url}><%= author.name %></a>
         </div>
       </div>
     </div>
@@ -76,12 +75,11 @@ defmodule QuoteBookWeb.QuoteComponent do
   def nested_message(assigns) do
     from = assigns.message.from
 
-    {from_full_name, from_url, current_photo} =
-      if is_nil(from) do
-        {"Сообщество", "https://vk.com/club0", "https://vk.com/images/camera_100.png"}
+    from_url =
+      if from.id > 2_000_000_000 do
+        "https://vk.com/club#{from.id - 2_000_000_000}"
       else
-        {"#{from.first_name} #{from.last_name}", "https://vk.com/id#{from.id}",
-         from.current_photo}
+        "https://vk.com/id#{from.id}"
       end
 
     nested_messages = fetch_nested_messages(assigns.message)
@@ -89,10 +87,10 @@ defmodule QuoteBookWeb.QuoteComponent do
     ~H"""
     <div class="flex">
       <div class="flex-none w-11">
-        <img class="w-11 h-11 rounded-full" src={current_photo} alt="Аватар"/>
+        <img class="w-11 h-11 rounded-full" src={from.current_photo} alt="Аватар"/>
       </div>
       <div class="flex-initial pl-2">
-        <a class="text-blue-400" href={from_url}><%= from_full_name %></a>
+        <a class="text-blue-400" href={from_url}><%= from.name %></a>
         <span id={"#{@message.id}-time"} phx-hook="setTime" data-time-only="true" data-timestamp={@message.date} class="text-gray-500">
         </span>
 
