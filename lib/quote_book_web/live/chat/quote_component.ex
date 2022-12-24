@@ -2,6 +2,8 @@ defmodule QuoteBookWeb.QuoteComponent do
   alias QuoteBookWeb.QuoteComponent
   use QuoteBookWeb, :component
 
+  @links_regex ~r/\[(id|club)([0-9]+)\|(.+?)\]/
+
   alias __MODULE__
 
   def quotes(assigns) do
@@ -82,6 +84,8 @@ defmodule QuoteBookWeb.QuoteComponent do
         "https://vk.com/id#{from.id}"
       end
 
+    strings = assigns.message.text |> format_links
+
     nested_messages = fetch_nested_messages(assigns.message)
 
     ~H"""
@@ -95,7 +99,9 @@ defmodule QuoteBookWeb.QuoteComponent do
         </span>
 
         <%= unless is_nil(@message.text) do %>
-          <p class='mb-4 last:mb-0'><%= @message.text %></p>
+          <p class='mb-4 last:mb-0'>
+            <%= for string <- strings, do: string %>
+          </p>
         <% end %>
 
         <%= if @message.attachments != [] do %>
@@ -154,5 +160,28 @@ defmodule QuoteBookWeb.QuoteComponent do
       _ ->
         ~H"<span><a href={@attachment.path}><%= @attachment.type %></a></span>"
     end
+  end
+
+  defp format_links(text) do
+    text
+    |> split_with_links()
+    |> map_to_html()
+  end
+
+  defp split_with_links(text) do
+    Regex.split(@links_regex, text, include_captures: true)
+  end
+
+  defp map_to_html(strings) do
+    Enum.flat_map(strings, fn string ->
+      result = Regex.run(@links_regex, string)
+
+      if is_nil(result) do
+        [string]
+      else
+        [_, type, id, text] = result
+        [Phoenix.HTML.raw("<a class=\"text-blue-400\" href=\"https://vk.com/#{type}#{id}\">"), text, Phoenix.HTML.raw("</a>")]
+      end
+    end)
   end
 end
