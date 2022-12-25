@@ -3,7 +3,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
 
   alias QuoteBookBot.Utils.{UserLoader, Attachments, ReplyMessages}
 
-  defcommand event, on_text: "/сьлржалсч" do
+  defcommand event, on_text: "/сьлржалсч", in: :chat do
     message =
       event
       |> fetch_message()
