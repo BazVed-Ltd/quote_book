@@ -84,7 +84,12 @@ defmodule QuoteBookWeb.QuoteComponent do
         "https://vk.com/id#{from.id}"
       end
 
-    strings = assigns.message.text |> format_links
+    render_text? = not is_nil(assigns.message.text)
+
+    strings =
+      if render_text? do
+        assigns.message.text |> format_links
+      end
 
     nested_messages = fetch_nested_messages(assigns.message)
 
@@ -98,7 +103,7 @@ defmodule QuoteBookWeb.QuoteComponent do
         <span id={"#{@message.id}-time"} phx-hook="setTime" data-time-only="true" data-timestamp={@message.date} class="text-gray-500">
         </span>
 
-        <%= unless is_nil(@message.text) do %>
+        <%= if render_text? do %>
           <p class='mb-4 last:mb-0'>
             <%= for string <- strings, do: string %>
           </p>
@@ -180,7 +185,12 @@ defmodule QuoteBookWeb.QuoteComponent do
         [string]
       else
         [_, type, id, text] = result
-        [Phoenix.HTML.raw("<a class=\"text-blue-400\" href=\"https://vk.com/#{type}#{id}\">"), text, Phoenix.HTML.raw("</a>")]
+
+        [
+          Phoenix.HTML.raw("<a class=\"text-blue-400\" href=\"https://vk.com/#{type}#{id}\">"),
+          text,
+          Phoenix.HTML.raw("</a>")
+        ]
       end
     end)
   end
