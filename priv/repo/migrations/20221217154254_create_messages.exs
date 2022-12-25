@@ -7,8 +7,8 @@ defmodule QuoteBook.Repo.Migrations.CreateMessages do
       add :text, :string
       add :peer_id, references(:chats, on_delete: :nothing)
       add :from_id, references(:users, on_delete: :nothing)
-      add :reply_message_id, references(:messages, on_delete: :nothing)
-      add :fwd_from_message_id, references(:messages, on_delete: :nothing)
+      add :reply_message_id, references(:messages, on_delete: :delete_all)
+      add :fwd_from_message_id, references(:messages, on_delete: :delete_all)
 
       add :date, :bigint
 
