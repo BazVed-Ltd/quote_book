@@ -2,6 +2,8 @@ defmodule QuoteBookWeb.QuoteComponent do
   alias QuoteBookWeb.QuoteComponent
   use QuoteBookWeb, :component
 
+  @links_regex ~r/\[(id|club)([0-9]+)\|(.+?)\]/
+
   alias __MODULE__
 
   def quotes(assigns) do
@@ -20,7 +22,6 @@ defmodule QuoteBookWeb.QuoteComponent do
     nested_messages = fetch_nested_messages(assigns.quote)
 
     author = assigns.quote.from
-    author_full_name = "#{author.first_name} #{author.last_name}"
     author_url = "https://vk.com/id#{author.id}"
 
     date =
@@ -41,7 +42,7 @@ defmodule QuoteBookWeb.QuoteComponent do
 
       <div class='flex'>
         <div class='ml-auto'>
-          Схоронил <a class='text-blue-400' href={author_url}><%= author_full_name %></a>
+          Схоронил <a class='text-blue-400' href={author_url}><%= author.name %></a>
         </div>
       </div>
     </div>
@@ -76,12 +77,18 @@ defmodule QuoteBookWeb.QuoteComponent do
   def nested_message(assigns) do
     from = assigns.message.from
 
-    {from_full_name, from_url, current_photo} =
-      if is_nil(from) do
-        {"Сообщество", "https://vk.com/club0", "https://vk.com/images/camera_100.png"}
+    from_url =
+      if from.id > 2_000_000_000 do
+        "https://vk.com/club#{from.id - 2_000_000_000}"
       else
-        {"#{from.first_name} #{from.last_name}", "https://vk.com/id#{from.id}",
-         from.current_photo}
+        "https://vk.com/id#{from.id}"
+      end
+
+    render_text? = not is_nil(assigns.message.text)
+
+    strings =
+      if render_text? do
+        assigns.message.text |> format_links
       end
 
     nested_messages = fetch_nested_messages(assigns.message)
@@ -89,15 +96,17 @@ defmodule QuoteBookWeb.QuoteComponent do
     ~H"""
     <div class="flex">
       <div class="flex-none w-11">
-        <img class="w-11 h-11 rounded-full" src={current_photo} alt="Аватар"/>
+        <img class="w-11 h-11 rounded-full" src={from.current_photo} alt="Аватар"/>
       </div>
       <div class="flex-initial pl-2">
-        <a class="text-blue-400" href={from_url}><%= from_full_name %></a>
+        <a class="text-blue-400" href={from_url}><%= from.name %></a>
         <span id={"#{@message.id}-time"} phx-hook="setTime" data-time-only="true" data-timestamp={@message.date} class="text-gray-500">
         </span>
 
-        <%= unless is_nil(@message.text) do %>
-          <p class='mb-4 last:mb-0'><%= @message.text %></p>
+        <%= if render_text? do %>
+          <p class='mb-4 last:mb-0'>
+            <%= for string <- strings, do: string %>
+          </p>
         <% end %>
 
         <%= if @message.attachments != [] do %>
@@ -134,7 +143,8 @@ defmodule QuoteBookWeb.QuoteComponent do
       :doc when assigns.attachment.ext == "mp4" ->
         ~H"""
         <video autoplay loop muted>
-          <source src={@attachment.path} type="video/mp4" />Your browser does not support the video tag.
+          <source src={@attachment.path} type="video/mp4" />
+          Ваш браузер не поддерживает HTML5 аудио.
         </video>
         """
 
@@ -144,8 +154,44 @@ defmodule QuoteBookWeb.QuoteComponent do
       :sticker ->
         ~H"<img class='object-scale-down w-40 h-40 align-middle' src={@attachment.path} />"
 
+      :audio_message ->
+        ~H"""
+        <audio controls>
+          <source src={@attachment.path} type="audio/mpeg">
+          <p>Ваш браузер не поддерживает HTML5 аудио.</p>
+        </audio>
+        """
+
       _ ->
         ~H"<span><a href={@attachment.path}><%= @attachment.type %></a></span>"
     end
+  end
+
+  defp format_links(text) do
+    text
+    |> split_with_links()
+    |> map_to_html()
+  end
+
+  defp split_with_links(text) do
+    Regex.split(@links_regex, text, include_captures: true)
+  end
+
+  defp map_to_html(strings) do
+    Enum.flat_map(strings, fn string ->
+      result = Regex.run(@links_regex, string)
+
+      if is_nil(result) do
+        [string]
+      else
+        [_, type, id, text] = result
+
+        [
+          Phoenix.HTML.raw("<a class=\"text-blue-400\" href=\"https://vk.com/#{type}#{id}\">"),
+          text,
+          Phoenix.HTML.raw("</a>")
+        ]
+      end
+    end)
   end
 end

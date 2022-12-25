@@ -4,7 +4,7 @@ defmodule QuoteBookBot.Commands.AddCoverToChat do
   alias QuoteBook.Book
   alias QuoteBookBot.Utils.Attachments
 
-  defcommand event, on_text: "/обложка" do
+  defcommand event, on_text: "/обложка", only_admin: true, in: :chat do
     message =
       event
       |> fetch_message()

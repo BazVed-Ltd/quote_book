@@ -317,6 +317,18 @@ defmodule QuoteBook.Book do
     Repo.all(User)
   end
 
+  def reject_exists_user(user_ids) do
+    query =
+      from u in User,
+        where: u.id in ^user_ids,
+        select: u.id
+
+    exists_ids = Repo.all(query)
+
+    user_ids
+    |> Enum.reject(&(&1 in exists_ids))
+  end
+
   @doc """
   Gets a single user.
 
@@ -427,7 +439,7 @@ defmodule QuoteBook.Book do
 
   def get_or_new_chat(id) do
     case Repo.get(Chat, id) do
-      nil -> %Chat{}
+      nil -> %Chat{id: id}
       chat -> chat
     end
   end

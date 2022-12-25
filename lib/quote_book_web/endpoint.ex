@@ -24,7 +24,7 @@ defmodule QuoteBookWeb.Endpoint do
 
   plug Plug.Static,
     at: "/attachments",
-    from: Application.get_env(:quote_book, :attachments_directory)
+    from: Application.compile_env!(:quote_book, :attachments_directory)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

@@ -3,7 +3,7 @@ defmodule QuoteBook.Repo.Migrations.CreateAttachments do
 
   def change do
     create table(:attachments) do
-      add :message_id, references(:messages, on_delete: :nothing)
+      add :message_id, references(:messages, on_delete: :delete_all)
       add :path, :string
       add :type, :string
       add :ext, :string

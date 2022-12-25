@@ -2,17 +2,44 @@ defmodule QuoteBookBot.Utils.UserLoader do
   alias QuoteBook.Book
 
   # TODO: Лучше скачивать аватарки
-  # TODO: Добавить поддержку сообществ
-  def insert_new_users_data_to_db() do
-    users_ids =
-      Book.get_users_from_messages()
-      |> Enum.filter(fn x -> x |> elem(1) |> is_nil() end)
-      |> Enum.map(&elem(&1, 0))
-      |> Enum.reject(&(&1 < 0))
+  def insert_new_users_data_to_db(user_ids) do
+    {group_ids, user_ids} = Enum.split_with(user_ids, &(&1 > 2_000_000_000))
 
-    get_users(users_ids)
-    |> photo_100_to_curernt_photo()
-    |> Book.insert_users()
+    {:ok, _} =
+      get_users(user_ids)
+      |> photo_100_to_curernt_photo()
+      |> Book.insert_users()
+
+    {:ok, _} =
+      get_groups(group_ids)
+      |> photo_100_to_curernt_photo()
+      |> negate_id()
+      |> Book.insert_users()
+  end
+
+  def message_to_users_list(message) do
+    do_message_to_users_list(message)
+    |> Enum.uniq()
+  end
+
+  defp do_message_to_users_list(nil), do: []
+
+  defp do_message_to_users_list(%{"from_id" => from_id} = message) do
+    reply_message = Map.get(message, "reply_message")
+    fwd_messages = Map.get(message, "fwd_messages", [])
+
+    id =
+      if from_id > 0 do
+        from_id
+      else
+        -from_id + 2_000_000_000
+      end
+
+    List.flatten([
+      id,
+      do_message_to_users_list(reply_message)
+      | Enum.map(fwd_messages, &do_message_to_users_list/1)
+    ])
   end
 
   def update_exists_users() do
@@ -33,11 +60,29 @@ defmodule QuoteBookBot.Utils.UserLoader do
     |> Book.update_users()
   end
 
-  defp get_users(users_ids) do
+  defp get_users([]), do: []
+
+  defp get_users(user_ids) do
     VkBot.Api.exec_method("users.get", %{
-      "user_ids" => Enum.join(users_ids, ","),
+      "user_ids" => Enum.join(user_ids, ","),
       "fields" => "photo_100"
     })
+  end
+
+  defp get_groups([]), do: []
+
+  defp get_groups(group_ids) do
+    group_ids = Enum.map(group_ids, fn id -> id - 2_000_000_000 end)
+
+    VkBot.Api.exec_method("groups.getById", %{
+      "group_ids" => Enum.join(group_ids, ","),
+      "fields" => "photo_100"
+    })
+  end
+
+  defp negate_id(groups) do
+    groups
+    |> Stream.map(fn g -> Map.update!(g, "id", &Kernel.-/1) end)
   end
 
   defp photo_100_to_curernt_photo(users) do

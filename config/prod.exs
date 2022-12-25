@@ -14,6 +14,11 @@ config :quote_book, QuoteBookWeb.Endpoint, cache_static_manifest: "priv/static/c
 # Do not print debug messages in production
 config :logger, level: :info
 
+unless System.get_env("NO_DOCKER") do
+  config :quote_book,
+    attachments_directory: "/app/attachments"
+end
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

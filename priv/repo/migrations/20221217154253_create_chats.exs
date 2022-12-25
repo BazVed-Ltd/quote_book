@@ -4,6 +4,7 @@ defmodule QuoteBook.Repo.Migrations.CreateChats do
   def change do
     create table(:chats) do
       add :title, :string
+      add :covers, {:array, :string}
 
       timestamps()
     end

@@ -3,7 +3,7 @@ defmodule QuoteBookBot.Commands.SaveChatName do
 
   alias QuoteBook.Book
 
-  defcommand event, on_text: "/чат" do
+  defcommand event, on_text: "/чат", only_admin: true, in: :chat do
     message =
       event
       |> fetch_message()
@@ -19,25 +19,11 @@ defmodule QuoteBookBot.Commands.SaveChatName do
 
       [_command | chat_title] ->
         peer_id = Map.fetch!(message, "peer_id")
-        from_id = Map.fetch!(message, "from_id")
 
-        is_admin =
-          VkBot.Api.exec_method("messages.getConversationMembers", %{"peer_id" => peer_id})
-          |> Map.fetch!("items")
-          |> Enum.find(%{}, fn user -> Map.fetch!(user, "member_id") == from_id end)
-          |> Map.get("is_admin", false)
+        chat = Book.get_or_new_chat(peer_id)
 
-        change_chat_title(is_admin, peer_id, chat_title)
+        Book.create_or_update_chat(chat, %{id: peer_id, title: Enum.join(chat_title, " ")})
+        {:ok, "Готово"}
     end
-  end
-
-  defp change_chat_title(false = _is_user_admin?, _chat_id, _new_chat_name),
-    do: {:ok, "Только для админов"}
-
-  defp change_chat_title(true = _is_user_admin?, chat_id, new_chat_name) do
-    chat = Book.get_or_new_chat(chat_id)
-
-    Book.create_or_update_chat(chat, %{id: chat_id, title: Enum.join(new_chat_name, " ")})
-    {:ok, "Готово"}
   end
 end
