@@ -42,9 +42,9 @@ defmodule QuoteBook.Book.Message do
     |> validate_required([:from_id, :date])
     |> cast_from_id_by_type()
     |> cast_assoc(:attachments)
-    |> validate_required_inclusion([:text, :attachments])
     |> cast_assoc(:reply_message, with: &__MODULE__.changeset_without_quote_id/2)
     |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_without_quote_id/2)
+    |> validate_required_inclusion([:text, :attachments, :reply_message, :fwd_messages])
   end
 
   defp validate_required_inclusion(changeset, fields, opts \\ []) do
