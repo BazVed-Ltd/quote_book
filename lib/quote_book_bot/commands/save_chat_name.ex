@@ -16,7 +16,7 @@ defmodule QuoteBookBot.Commands.SaveChatName do
 
     case args do
       [_command] ->
-        {:ok, "Попробуйте /чат название чата"}
+        reply_message(request, "Попробуйте /чат название чата")
 
       [_command | chat_title] ->
         peer_id = Map.fetch!(message, "peer_id")
@@ -24,7 +24,7 @@ defmodule QuoteBookBot.Commands.SaveChatName do
         chat = Book.get_or_new_chat(peer_id)
 
         Book.create_or_update_chat(chat, %{id: peer_id, title: Enum.join(chat_title, " ")})
-        {:ok, "Готово"}
+        reply_message(request, "Готово")
     end
   end
 end
