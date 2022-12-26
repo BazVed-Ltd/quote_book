@@ -1,24 +1,21 @@
 defmodule QuoteBookWeb.QuoteComponent do
-  alias QuoteBookWeb.QuoteComponent
   use QuoteBookWeb, :component
 
   @links_regex ~r/\[(id|club)([0-9]+)\|(.+?)\]/
-
-  alias __MODULE__
 
   def quotes(assigns) do
     ~H"""
     <ul class="flex flex-col max-w-lg px-3 sm:px-0 mx-auto">
       <%= for quote_message <- @quotes do %>
         <li>
-          <QuoteComponent.quote quote={quote_message} />
+          <.message_quote quote={quote_message} />
         </li>
       <% end %>
     </ul>
     """
   end
 
-  def quote(assigns) do
+  def message_quote(assigns) do
     nested_messages = fetch_nested_messages(assigns.quote)
 
     author = assigns.quote.from
@@ -37,7 +34,7 @@ defmodule QuoteBookWeb.QuoteComponent do
       </div>
 
       <div class="mb-3">
-        <QuoteComponent.nested_messages messages={nested_messages} />
+        <.nested_messages messages={nested_messages} />
       </div>
 
       <div class='flex'>
@@ -67,7 +64,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     <ul>
       <%= for message <- @messages do %>
         <li class="mb-4 last:mb-0">
-          <QuoteComponent.nested_message message={message} />
+          <.nested_message message={message} />
         </li>
       <% end %>
     </ul>
@@ -111,7 +108,7 @@ defmodule QuoteBookWeb.QuoteComponent do
 
         <%= if @message.attachments != [] do %>
           <div class="mt-2">
-            <QuoteComponent.attachments attachments={@message.attachments} />
+            <.attachments attachments={@message.attachments} />
           </div>
         <% end %>
       </div>
@@ -119,7 +116,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     <%= if nested_messages != [] do %>
       <div class="ml-3 mt-4">
           <div class='border-l border-zinc-600 pl-4'>
-            <QuoteComponent.nested_messages messages={nested_messages} />
+            <.nested_messages messages={nested_messages} />
           </div>
       </div>
     <% end %>
@@ -131,7 +128,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     <ul class="flex flex-wrap gap-1">
       <%= for attachment <- @attachments do %>
         <li>
-          <QuoteComponent.attachment attachment={attachment} />
+          <.attachment attachment={attachment} />
         </li>
       <% end %>
     </ul>
