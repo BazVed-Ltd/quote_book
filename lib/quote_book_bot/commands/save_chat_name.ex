@@ -1,12 +1,13 @@
 defmodule QuoteBookBot.Commands.SaveChatName do
-  use VkBot.CommandsManager
+  import VkBot.CommandsManager
+  require VkBot.CommandsManager
 
   alias QuoteBook.Book
 
-  defcommand event, on_text: "/чат", only_admin: true, in: :chat do
-    message =
-      event
-      |> fetch_message()
+  defcommand request,
+    predicate: [on_text: "/чат", in: :chat],
+    permissions: [only_admin: true] do
+    message = request.message
 
     args =
       message

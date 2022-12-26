@@ -1,13 +1,14 @@
 defmodule QuoteBookBot.Commands.AddCoverToChat do
-  use VkBot.CommandsManager
+  import VkBot.CommandsManager
+  require VkBot.CommandsManager
 
   alias QuoteBook.Book
   alias QuoteBookBot.Utils.Attachments
 
-  defcommand event, on_text: "/обложка", only_admin: true, in: :chat do
-    message =
-      event
-      |> fetch_message()
+  defcommand request,
+    predicate: [on_text: "/обложка", in: :chat],
+    permissions: [only_admin: true] do
+    message = request.message
 
     with [vk_attachment] <- Map.fetch!(message, "attachments"),
          att_type = Map.fetch!(vk_attachment, "type"),
@@ -18,9 +19,9 @@ defmodule QuoteBookBot.Commands.AddCoverToChat do
         |> Attachments.load_attachment()
 
       Book.append_chat_cover(message["peer_id"], path)
-      {:ok, "ok"}
+      reply_message(request, "Готово")
     else
-      _error -> {:ok, "Прикрепи одну ГИФКУ или КАРТИНКУ"}
+      _error -> reply_message(request, "Прикрепи одну ГИФКУ или КАРТИНКУ")
     end
   end
 end
