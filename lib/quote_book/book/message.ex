@@ -26,7 +26,7 @@ defmodule QuoteBook.Book.Message do
   def changeset(message, attrs) do
     changeset =
       message
-      |> changeset_without_quote_id(attrs)
+      |> changeset_nested_message(attrs)
       |> validate_required_inclusion([:reply_message, :fwd_messages],
         error_message: "Вы не прикрепили сообщения, которые должны стать цитатой"
       )
@@ -36,14 +36,14 @@ defmodule QuoteBook.Book.Message do
     |> put_change(:quote_id, get_field(changeset, :peer_id) |> QuoteBook.Book.quotes_count())
   end
 
-  def changeset_without_quote_id(message, attrs) do
+  def changeset_nested_message(message, attrs) do
     message
     |> cast(attrs, [:text, :peer_id, :from_id, :date])
     |> validate_required([:from_id, :date])
     |> cast_from_id_by_type()
     |> cast_assoc(:attachments)
-    |> cast_assoc(:reply_message, with: &__MODULE__.changeset_without_quote_id/2)
-    |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_without_quote_id/2)
+    |> cast_assoc(:reply_message, with: &__MODULE__.changeset_nested_message/2)
+    |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_nested_message/2)
     |> validate_required_inclusion([:text, :attachments, :reply_message, :fwd_messages])
   end
 
