@@ -19,22 +19,30 @@ defmodule QuoteBook.Book.Message do
     field :fwd_from_message_id, :id
     has_many :fwd_messages, QuoteBook.Book.Message, foreign_key: :fwd_from_message_id
 
+    field :deleted, :boolean, default: false
+
     timestamps()
   end
 
   @doc false
   def changeset(message, attrs) do
-    changeset =
-      message
-      |> changeset_nested_message(attrs)
-      |> validate_required_inclusion([:reply_message, :fwd_messages],
-        error_message: "Вы не прикрепили сообщения, которые должны стать цитатой"
-      )
-      |> cast(attrs, [:peer_id])
-      |> validate_required([:peer_id])
+    message
+    |> changeset_nested_message(attrs)
+    |> validate_required_inclusion([:reply_message, :fwd_messages],
+      error_message: "Вы не прикрепили сообщения, которые должны стать цитатой"
+    )
+    |> cast(attrs, [:peer_id, :deleted])
+    |> validate_required([:peer_id])
+    |> cast_quote_id()
+  end
 
-    changeset
-    |> put_change(:quote_id, get_field(changeset, :peer_id) |> QuoteBook.Book.quotes_count())
+  def cast_quote_id(message) do
+    peer_id = get_field(message, :peer_id)
+
+    quote_id = (QuoteBook.Book.get_last_quote_id(peer_id) || 0) + 1
+
+    message
+    |> put_change(:quote_id, quote_id)
   end
 
   def changeset_nested_message(message, attrs) do
@@ -50,7 +58,11 @@ defmodule QuoteBook.Book.Message do
 
   defp validate_required_inclusion(changeset, fields, opts \\ []) do
     error_message =
-      Keyword.get(opts, :error_message, "Required at least one of these fields: #{inspect(fields)}")
+      Keyword.get(
+        opts,
+        :error_message,
+        "Required at least one of these fields: #{inspect(fields)}"
+      )
 
     if Enum.any?(fields, &present?(changeset, &1)) do
       changeset

@@ -12,7 +12,7 @@ defmodule QuoteBook.Book do
   @raw_sql_all_messages """
   SELECT *
   FROM messages
-  WHERE quote_id IS NOT null AND peer_id = ?
+  WHERE quote_id IS NOT null AND NOT deleted AND peer_id = ?
   UNION ALL
   SELECT n.*
   FROM messages n
@@ -44,12 +44,14 @@ defmodule QuoteBook.Book do
     Repo.all(Chat)
   end
 
-  def quotes_count(peer_id) do
+  def get_last_quote_id(peer_id) do
     query =
-      from m in Message,
-        where: m.peer_id == ^peer_id
+      from(m in Message,
+        where: m.peer_id == ^peer_id,
+        select: max(m.quote_id)
+      )
 
-    Repo.aggregate(query, :count, :quote_id)
+    Repo.one!(query)
   end
 
   @raw_sql_message_tree """
@@ -170,8 +172,82 @@ defmodule QuoteBook.Book do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_message(%Message{} = message) do
-    Repo.delete(message)
+  def maybe_delete_quote(peer_id, quote_id, from_id) do
+    query =
+      from m in Message,
+        where:
+          m.peer_id == ^peer_id and m.quote_id == ^quote_id and m.from_id == ^from_id and
+            not m.deleted
+
+    maybe_delete_or_update_by_query(query)
+  end
+
+  def maybe_delete_quote_by_admin(peer_id, quote_id) do
+    query =
+      from m in Message,
+        where: m.peer_id == ^peer_id and m.quote_id == ^quote_id and not m.deleted
+
+    maybe_delete_or_update_by_query(query)
+  end
+
+  defp maybe_delete_or_update_by_query(query) do
+    query
+    |> Repo.one()
+    |> maybe_delete_or_update()
+  end
+
+  defp maybe_delete_or_update(nil), do: :nothing
+
+  defp maybe_delete_or_update(quote_message) do
+    last_quote_id = get_last_quote_id(quote_message.peer_id)
+
+    if quote_message.quote_id == last_quote_id do
+      Repo.delete!(quote_message)
+    else
+      query =
+        from m in Message,
+          where: m.quote_id == ^quote_message.quote_id,
+          update: [set: [deleted: true]]
+
+      Repo.update_all(query, [])
+    end
+
+    :deleted
+  end
+
+  def maybe_delete_last_quote(peer_id, from_id) do
+    last_quote_id = get_last_quote_id(peer_id)
+
+    query =
+      from m in Message,
+        where:
+          m.peer_id == ^peer_id and m.quote_id == ^last_quote_id and m.from_id == ^from_id and
+            not m.deleted
+
+    maybe_delete_last_by_query(query)
+  end
+
+  def maybe_delete_last_quote_by_admin(peer_id) do
+    last_quote_id = get_last_quote_id(peer_id)
+
+    query =
+      from m in Message,
+        where: m.peer_id == ^peer_id and m.quote_id == ^last_quote_id and not m.deleted
+
+    maybe_delete_last_by_query(query)
+  end
+
+  defp maybe_delete_last_by_query(query) do
+    query
+    |> Repo.one()
+    |> maybe_delete_last()
+  end
+
+  defp maybe_delete_last(nil), do: :nothing
+
+  defp maybe_delete_last(quote_message) do
+    Repo.delete!(quote_message)
+    :deleted
   end
 
   @doc """
