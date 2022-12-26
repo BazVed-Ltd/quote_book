@@ -136,9 +136,9 @@ defmodule QuoteBook.Book do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_quote_from_message(attrs \\ %{}) do
+  def create_quote_from_message(attrs \\ %{}, deep) do
     %Message{}
-    |> Message.changeset(attrs)
+    |> Message.changeset(attrs, deep)
     |> Repo.insert()
   end
 

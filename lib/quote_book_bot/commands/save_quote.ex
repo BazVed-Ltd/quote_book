@@ -20,7 +20,18 @@ defmodule QuoteBookBot.Commands.SaveQuote do
     |> QuoteBook.Book.reject_exists_user()
     |> UserLoader.insert_new_users_data_to_db()
 
-    case QuoteBook.Book.create_quote_from_message(message) do
+    args =
+      message
+      |> Map.fetch!("text")
+      |> String.split(" ")
+
+    {deep, _rest} = case args do
+      [_command] -> {:infinity, ""}
+      [_command, deep] -> Integer.parse("0" <> deep)
+      _else -> {:infinity, ""}
+    end
+
+    case QuoteBook.Book.create_quote_from_message(message, deep) do
       {:ok, message_quote} ->
         reply_message(request, message_quote.quote_id)
 

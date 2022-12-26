@@ -25,9 +25,9 @@ defmodule QuoteBook.Book.Message do
   end
 
   @doc false
-  def changeset(message, attrs) do
+  def changeset(message, attrs, deep \\ :infinity) do
     message
-    |> changeset_nested_message(attrs)
+    |> changeset_nested_message(attrs, deep)
     |> validate_required_inclusion([:reply_message, :fwd_messages],
       error_message: "Вы не прикрепили сообщения, которые должны стать цитатой"
     )
@@ -45,15 +45,30 @@ defmodule QuoteBook.Book.Message do
     |> put_change(:quote_id, quote_id)
   end
 
-  def changeset_nested_message(message, attrs) do
+  def changeset_nested_message(message, attrs, deep) do
     message
     |> cast(attrs, [:text, :from_id, :date])
     |> validate_required([:from_id, :date])
     |> cast_from_id_by_type()
     |> cast_assoc(:attachments)
-    |> cast_assoc(:reply_message, with: &__MODULE__.changeset_nested_message/2)
-    |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_nested_message/2)
+    |> cast_nested_messages(deep)
     |> validate_required_inclusion([:text, :attachments, :reply_message, :fwd_messages])
+  end
+
+  defp cast_nested_messages(message, 0) do
+    message
+  end
+
+  defp cast_nested_messages(message, :infinity) do
+    message
+    |> cast_assoc(:reply_message, with: &__MODULE__.changeset_nested_message(&1, &2, :infinity))
+    |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_nested_message(&1, &2, :infinity))
+  end
+
+  defp cast_nested_messages(message, deep) do
+    message
+    |> cast_assoc(:reply_message, with: &__MODULE__.changeset_nested_message(&1, &2, deep - 1))
+    |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_nested_message(&1, &2, deep - 1))
   end
 
   defp validate_required_inclusion(changeset, fields, opts \\ []) do
