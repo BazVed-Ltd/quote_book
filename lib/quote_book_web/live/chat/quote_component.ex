@@ -42,7 +42,7 @@ defmodule QuoteBookWeb.QuoteComponent do
 
       <div class='flex'>
         <div class='ml-auto'>
-          Схоронил <a class='text-blue-400' href={author_url}><%= author.name %></a>
+          Схоронил <a href={author_url}><%= author.name %></a>
         </div>
       </div>
     </div>
@@ -99,7 +99,7 @@ defmodule QuoteBookWeb.QuoteComponent do
         <img class="w-11 h-11 rounded-full" src={from.current_photo} alt="Аватар"/>
       </div>
       <div class="flex-initial pl-2">
-        <a class="text-blue-400" href={from_url}><%= from.name %></a>
+        <a href={from_url}><%= from.name %></a>
         <span id={"#{@message.id}-time"} phx-hook="setTime" data-time-only="true" data-timestamp={@message.date} class="text-gray-500">
         </span>
 
@@ -141,12 +141,7 @@ defmodule QuoteBookWeb.QuoteComponent do
   def attachment(assigns) do
     case assigns.attachment.type do
       :doc when assigns.attachment.ext == "mp4" ->
-        ~H"""
-        <video autoplay loop muted>
-          <source src={@attachment.path} type="video/mp4" />
-          Ваш браузер не поддерживает HTML5 аудио.
-        </video>
-        """
+        ~H"<video autoplay loop muted src={@attachment.path} type='video/mp4' />"
 
       type when type in ~w(photo doc graffiti)a ->
         ~H"<img class='object-scale-down w-full h-full align-middle' src={@attachment.path} />"
@@ -155,12 +150,7 @@ defmodule QuoteBookWeb.QuoteComponent do
         ~H"<img class='object-scale-down w-40 h-40 align-middle' src={@attachment.path} />"
 
       :audio_message ->
-        ~H"""
-        <audio controls>
-          <source src={@attachment.path} type="audio/mpeg">
-          <p>Ваш браузер не поддерживает HTML5 аудио.</p>
-        </audio>
-        """
+        ~H"<audio controls src={@attachment.path} type='audio/mpeg' />"
 
       _ ->
         ~H"<span><a href={@attachment.path}><%= @attachment.type %></a></span>"
@@ -187,7 +177,7 @@ defmodule QuoteBookWeb.QuoteComponent do
         [_, type, id, text] = result
 
         [
-          Phoenix.HTML.raw("<a class=\"text-blue-400\" href=\"https://vk.com/#{type}#{id}\">"),
+          Phoenix.HTML.raw("<a href=\"https://vk.com/#{type}#{id}\">"),
           text,
           Phoenix.HTML.raw("</a>")
         ]

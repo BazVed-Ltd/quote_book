@@ -11,6 +11,10 @@ html {
   @apply bg-zinc-800 p-4 border border-zinc-600 rounded-xl;
 }
 
+a {
+  @apply text-blue-400;
+}
+
 a:hover {
   @apply underline;
   @apply decoration-solid;
