@@ -71,9 +71,10 @@ defmodule QuoteBookWeb.QuoteComponent do
 
     ~H"""
     <ul>
-      <%= for message <- @messages do %>
-        <li class="mb-4 last:mb-0">
-          <.nested_message message={message} top_level={top_level}/>
+      <%= for [prev, message] <- Stream.chunk_every([nil | @messages], 2, 1) do %>
+        <% collapse = prev && prev.from.id == message.from.id && message.date - prev.date < 120 %>
+        <li class="mt-4 first:mt-0">
+          <.nested_message message={message} top_level={top_level} collapse={collapse}/>
         </li>
       <% end %>
     </ul>
@@ -100,24 +101,28 @@ defmodule QuoteBookWeb.QuoteComponent do
     nested_messages = fetch_nested_messages(assigns.message)
 
     ~H"""
-    <div class="grid grid-cols-message gap-x-2">
-      <div class="w-11 row-span-2">
-        <img class="w-11 h-11 rounded-full" src={from.current_photo} alt="Аватар"/>
-      </div>
-      <div>
-        <a href={from_url}><%= from.name %></a>
-      <%= unless @top_level, do: HTML.raw "</div><div>" %>
-        <span
-          id={"#{@message.id}-time"}
-          phx-hook="setTime"
-          data-time-only="true"
-          data-timestamp={@message.date}
-          class="text-gray-500"
-          >
-        </span>
-      </div>
+    <div class={"grid gap-x-2 " <> if @collapse, do: "grid-cols-collapsed-message", else: "grid-cols-message"}>
+      <%= unless @collapse do %>
+        <div class="w-11 row-span-2">
+          <img class="w-11 h-11 rounded-full" src={from.current_photo} alt="Аватар"/>
+        </div>
 
-      <div>
+        <div>
+          <a href={from_url}><%= from.name %></a>
+        <%= unless @top_level, do: HTML.raw "</div><div>" %>
+          <span
+            id={"#{@message.id}-time"}
+            phx-hook="setTime"
+            data-time-only="true"
+            data-timestamp={@message.date}
+            class="text-gray-500"
+            >
+          </span>
+        </div>
+      <% end %>
+
+
+      <div class={(unless @top_level, do: "col-span-2", else: "") <> " " <> if @top_level and @collapse, do: "ml-top-collapsed", else: "" }>
         <%= if render_text? do %>
           <p class='mb-4 last:mb-0'>
             <%= for string <- strings, do: string %>

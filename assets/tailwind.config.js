@@ -13,6 +13,7 @@ module.exports = {
     extend: {
       gridTemplateColumns: {
         'message': 'min-content auto',
+        'collapsed-message': 'auto',
       }
     }
   },
