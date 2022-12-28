@@ -88,7 +88,7 @@ defmodule QuoteBookWeb.QuoteComponent do
 
     strings =
       if render_text? do
-        assigns.message.text |> format_links
+        assigns.message.text |> format_text
       end
 
     nested_messages = fetch_nested_messages(assigns.message)
@@ -160,7 +160,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     end
   end
 
-  defp format_links(text) do
+  defp format_text(text) do
     text
     |> split_with_links()
     |> map_to_html()
@@ -175,16 +175,23 @@ defmodule QuoteBookWeb.QuoteComponent do
       result = Regex.run(@links_regex, string)
 
       if is_nil(result) do
-        [string]
+        insert_new_lines(string)
       else
         [_, type, id, text] = result
 
         [
           HTML.raw("<a href=\"https://vk.com/#{type}#{id}\">"),
-          text,
+          insert_new_lines(text),
           HTML.raw("</a>")
         ]
+        |> List.flatten()
       end
     end)
+  end
+
+  defp insert_new_lines(text) do
+    text
+    |> String.split("\n")
+    |> Enum.intersperse(HTML.raw("<br />"))
   end
 end
