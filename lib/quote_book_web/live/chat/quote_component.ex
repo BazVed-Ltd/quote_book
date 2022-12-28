@@ -32,7 +32,12 @@ defmodule QuoteBookWeb.QuoteComponent do
     <div class='card mb-5'>
       <div class='flex border-b border-zinc-700 pb-2 mb-3'>
         <div>#<%= @quote.quote_id %></div>
-        <div id={"#{@quote.quote_id}-date"} class='ml-auto' phx-hook="setTime" data-timestamp={date}></div>
+        <div
+          id={"#{@quote.quote_id}-date"}
+          class='ml-auto'
+          phx-hook="setTime"
+          data-timestamp={date}
+        ></div>
       </div>
 
       <div class="mb-3">
@@ -63,6 +68,7 @@ defmodule QuoteBookWeb.QuoteComponent do
 
   def nested_messages(assigns) do
     top_level = Map.get(assigns, :top_level, false)
+
     ~H"""
     <ul>
       <%= for message <- @messages do %>
@@ -101,7 +107,13 @@ defmodule QuoteBookWeb.QuoteComponent do
       <div>
         <a href={from_url}><%= from.name %></a>
       <%= unless @top_level, do: HTML.raw "</div><div>" %>
-        <span id={"#{@message.id}-time"} phx-hook="setTime" data-time-only="true" data-timestamp={@message.date} class="text-gray-500">
+        <span
+          id={"#{@message.id}-time"}
+          phx-hook="setTime"
+          data-time-only="true"
+          data-timestamp={@message.date}
+          class="text-gray-500"
+          >
         </span>
       </div>
 
