@@ -1,6 +1,8 @@
 defmodule QuoteBookWeb.QuoteComponent do
   use QuoteBookWeb, :component
 
+  alias Phoenix.HTML
+
   @links_regex ~r/\[(id|club)([0-9]+)\|(.+?)\]/
 
   def quotes(assigns) do
@@ -34,7 +36,7 @@ defmodule QuoteBookWeb.QuoteComponent do
       </div>
 
       <div class="mb-3">
-        <.nested_messages messages={nested_messages} />
+        <.nested_messages messages={nested_messages} top_level={true} />
       </div>
 
       <div class='flex'>
@@ -60,11 +62,12 @@ defmodule QuoteBookWeb.QuoteComponent do
   end
 
   def nested_messages(assigns) do
+    top_level = Map.get(assigns, :top_level, false)
     ~H"""
     <ul>
       <%= for message <- @messages do %>
         <li class="mb-4 last:mb-0">
-          <.nested_message message={message} />
+          <.nested_message message={message} top_level={top_level}/>
         </li>
       <% end %>
     </ul>
@@ -91,15 +94,18 @@ defmodule QuoteBookWeb.QuoteComponent do
     nested_messages = fetch_nested_messages(assigns.message)
 
     ~H"""
-    <div class="flex">
-      <div class="flex-none w-11">
+    <div class="grid grid-cols-message gap-x-2">
+      <div class="w-11 row-span-2">
         <img class="w-11 h-11 rounded-full" src={from.current_photo} alt="Аватар"/>
       </div>
-      <div class="flex-initial pl-2">
+      <div>
         <a href={from_url}><%= from.name %></a>
+      <%= unless @top_level, do: HTML.raw "</div><div>" %>
         <span id={"#{@message.id}-time"} phx-hook="setTime" data-time-only="true" data-timestamp={@message.date} class="text-gray-500">
         </span>
+      </div>
 
+      <div>
         <%= if render_text? do %>
           <p class='mb-4 last:mb-0'>
             <%= for string <- strings, do: string %>
@@ -114,8 +120,8 @@ defmodule QuoteBookWeb.QuoteComponent do
       </div>
     </div>
     <%= if nested_messages != [] do %>
-      <div class="ml-3 mt-4">
-          <div class='border-l border-zinc-600 pl-4'>
+      <div class={"ml-1 mt-4 " <> if @top_level, do: "pl-nested", else: ""}>
+          <div class='border-l-2 border-zinc-600 pl-1'>
             <.nested_messages messages={nested_messages} />
           </div>
       </div>
@@ -174,9 +180,9 @@ defmodule QuoteBookWeb.QuoteComponent do
         [_, type, id, text] = result
 
         [
-          Phoenix.HTML.raw("<a href=\"https://vk.com/#{type}#{id}\">"),
+          HTML.raw("<a href=\"https://vk.com/#{type}#{id}\">"),
           text,
-          Phoenix.HTML.raw("</a>")
+          HTML.raw("</a>")
         ]
       end
     end)

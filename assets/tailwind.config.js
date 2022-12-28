@@ -10,7 +10,11 @@ module.exports = {
     '../lib/*_web/**/*.*ex'
   ],
   theme: {
-    extend: {},
+    extend: {
+      gridTemplateColumns: {
+        'message': 'min-content auto',
+      }
+    }
   },
   plugins: [
     require('@tailwindcss/forms'),

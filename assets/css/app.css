@@ -20,6 +20,10 @@ a:hover {
   @apply decoration-solid;
 }
 
+.pl-nested {
+  padding-left: 3.22rem;
+}
+
 /* Alerts and form errors used by phx.new */
 .alert {
   padding: 15px;
