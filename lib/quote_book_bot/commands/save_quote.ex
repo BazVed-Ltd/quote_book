@@ -4,22 +4,8 @@ defmodule QuoteBookBot.Commands.SaveQuote do
 
   require Logger
 
-  alias QuoteBookBot.Utils.{UserLoader, Attachments, ReplyMessages}
+  alias QuoteBookBot.Utils.{UserLoader, Attachments, ReplyMessages, Links}
 
-  defp host do
-    Application.get_env(:quote_book, :host, "localhost")
-  end
-
-  defp chat_link(chat) do
-    slug_or_id =
-      if is_nil(chat.slug) do
-        chat.id
-      else
-        chat.slug
-      end
-
-    QuoteBookWeb.Router.Helpers.live_path(QuoteBookWeb.Endpoint, QuoteBookWeb.ChatLive, slug_or_id)
-  end
 
   defcommand request,
     predicate: [on_text: "/сьлржалсч", in: :chat] do
@@ -51,7 +37,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
       {:ok, _message_quote} ->
         reply_with = """
         Добавил.
-        #{host() <> chat_link(chat)}
+        #{Links.chat_link(chat)}
         """
 
         reply_message(request, reply_with)

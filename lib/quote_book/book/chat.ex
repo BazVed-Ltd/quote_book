@@ -20,7 +20,7 @@ defmodule QuoteBook.Book.Chat do
     |> validate_required([:id])
     |> unique_constraint(:title, message: "Чат с таким названием уже существует. Попробуйте другое")
     |> validate_length(:title, min: 1, max: 24, message: "Название чата не должно превышать 24 символа")
-    |> validate_format(:title, ~r/^[^0-9].*$/, message: "Название не может начинается с цифры")
+    |> validate_format(:title, ~r/\p{L}/u, message: "Название должно содержать хотя бы одну букву")
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint(message: "Чат с таким названием уже существует. Попробуйте другое")
   end

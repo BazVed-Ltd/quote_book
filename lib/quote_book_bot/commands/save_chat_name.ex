@@ -2,6 +2,7 @@ defmodule QuoteBookBot.Commands.SaveChatName do
   import VkBot.CommandsManager
   require VkBot.CommandsManager
 
+  alias QuoteBookBot.Utils.Links
   alias QuoteBook.Book
 
   defcommand request,
@@ -31,8 +32,15 @@ defmodule QuoteBookBot.Commands.SaveChatName do
     end
   end
 
-  defp parse_ecto_response({:ok, _changeset}) do
-    fn request -> reply_message(request, "Готово") end
+  defp parse_ecto_response({:ok, chat}) do
+    message =
+      if is_nil(chat.slug) do
+        "Название чата изменено, но сделать красивую ссылку не получилось."
+      else
+        "Название чата изменено"
+      end <> "\nНовая ссылка на чат #{Links.chat_link(chat)}"
+
+    fn request -> reply_message(request, message) end
   end
 
   defp parse_ecto_response({:error, changeset}) do
