@@ -6,6 +6,14 @@ defmodule QuoteBookBot.Commands.SaveQuote do
 
   alias QuoteBookBot.Utils.{UserLoader, Attachments, ReplyMessages}
 
+  defp host do
+    Application.get_env(:quote_book, :host, "localhost")
+  end
+
+  defp chat_link(chat) do
+    QuoteBookWeb.Router.Helpers.live_path(QuoteBookWeb.Endpoint, QuoteBookWeb.ChatLive, chat.id)
+  end
+
   defcommand request,
     predicate: [on_text: "/сьлржалсч", in: :chat] do
     message =
@@ -32,8 +40,12 @@ defmodule QuoteBookBot.Commands.SaveQuote do
     end
 
     case QuoteBook.Book.create_quote_from_message(message, deep) do
-      {:ok, message_quote} ->
-        reply_message(request, message_quote.quote_id)
+      {:ok, _message_quote} ->
+        reply_with = """
+        Добавил.
+        #{host() <> chat_link(chat)}
+        """
+        reply_message(request, reply_with)
 
       {:error, changeset} ->
         error =
