@@ -521,6 +521,13 @@ defmodule QuoteBook.Book do
     Repo.one(query)
   end
 
+  def get_chat_by_slug_or_id(text) do
+    case Integer.parse(text) do
+      {peer_id, ""} -> get_chat(peer_id)
+      _otherwise -> get_chat_by_slug(text)
+    end
+  end
+
   def get_or_new_chat(id) do
     case Repo.get(Chat, id) do
       nil -> %Chat{id: id}

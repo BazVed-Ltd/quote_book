@@ -10,7 +10,7 @@ defmodule QuoteBookWeb.ChatLive do
   def mount(params, _session, socket) do
     peer_id = Map.fetch!(params, "peer_id")
 
-    chat = get_chat_by_name_or_id(peer_id)
+    chat = Book.get_chat_by_slug_or_id(peer_id)
 
     if is_nil(chat) do
       {:ok,
@@ -25,13 +25,6 @@ defmodule QuoteBookWeb.ChatLive do
        |> assign(chat: chat, quotes: quotes)
        |> assign_title(chat.title)
        |> assign_covers(chat.covers)}
-    end
-  end
-
-  defp get_chat_by_name_or_id(text) do
-    case Integer.parse(text) do
-      {peer_id, ""} -> Book.get_chat(peer_id)
-      _otherwise -> Book.get_chat_by_slug(text)
     end
   end
 
