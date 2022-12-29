@@ -27,7 +27,7 @@ defmodule QuoteBookWeb.ChatLive do
   end
 
   defp assign_title(socket, title) do
-    assign(socket, render_title?: true, title: title)
+    assign(socket, render_title?: true, title: title, page_title: title)
   end
 
   defp assign_covers(socket, []) do

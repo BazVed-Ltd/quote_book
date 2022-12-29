@@ -7,7 +7,7 @@ defmodule QuoteBookWeb.IndexLive do
   @impl true
   def mount(_params, _session, socket) do
     chats = Book.list_chats()
-    {:ok, socket |> assign(chats: chats)}
+    {:ok, socket |> assign(chats: chats, page_title: "Каналы")}
   end
 
   @impl true
