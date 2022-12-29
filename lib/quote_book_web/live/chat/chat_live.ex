@@ -1,25 +1,39 @@
 defmodule QuoteBookWeb.ChatLive do
   use QuoteBookWeb, :live_view
 
+  import Phoenix.LiveView
+
   alias QuoteBook.Book
   alias QuoteBookWeb.QuoteComponent
 
   @impl true
   def mount(params, _session, socket) do
-    peer_id =
-      params
-      |> Map.fetch!("peer_id")
-      |> String.to_integer()
+    peer_id = Map.fetch!(params, "peer_id")
 
-    quotes = Book.list_quotes(peer_id)
+    with chat = get_chat_by_name_or_id(peer_id),
+         false <- is_nil(chat) do
+      quotes = Book.list_quotes(chat.id)
 
-    chat = Book.get_chat!(peer_id)
+      {:ok,
+       socket
+       |> assign(chat: chat, quotes: quotes)
+       |> assign_title(chat.title)
+       |> assign_covers(chat.covers)}
+    else
+      true ->
+        {:ok,
+        socket
+        |> push_redirect(to: "/")
+        |> put_flash(:error, "ОШИБКА!!! Нет такого чата")
+      }
+    end
+  end
 
-    {:ok,
-     socket
-     |> assign(chat: chat, quotes: quotes)
-     |> assign_title(chat.title)
-     |> assign_covers(chat.covers)}
+  defp get_chat_by_name_or_id(text) do
+    case Integer.parse(text) do
+      {peer_id, ""} -> Book.get_chat(peer_id)
+      _otherwise -> Book.get_chat_by_slug(text)
+    end
   end
 
   defp assign_title(socket, nil) do

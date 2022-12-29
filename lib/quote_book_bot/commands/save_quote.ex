@@ -11,7 +11,14 @@ defmodule QuoteBookBot.Commands.SaveQuote do
   end
 
   defp chat_link(chat) do
-    QuoteBookWeb.Router.Helpers.live_path(QuoteBookWeb.Endpoint, QuoteBookWeb.ChatLive, chat.id)
+    slug_or_id =
+      if is_nil(chat.slug) do
+        chat.id
+      else
+        chat.slug
+      end
+
+    QuoteBookWeb.Router.Helpers.live_path(QuoteBookWeb.Endpoint, QuoteBookWeb.ChatLive, slug_or_id)
   end
 
   defcommand request,
@@ -33,11 +40,12 @@ defmodule QuoteBookBot.Commands.SaveQuote do
       |> Map.fetch!("text")
       |> String.split(" ")
 
-    {deep, _rest} = case args do
-      [_command] -> {:infinity, ""}
-      [_command, deep] -> Integer.parse("0" <> deep)
-      _else -> {:infinity, ""}
-    end
+    {deep, _rest} =
+      case args do
+        [_command] -> {:infinity, ""}
+        [_command, deep] -> Integer.parse("0" <> deep)
+        _else -> {:infinity, ""}
+      end
 
     case QuoteBook.Book.create_quote_from_message(message, deep) do
       {:ok, _message_quote} ->
@@ -45,6 +53,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
         Добавил.
         #{host() <> chat_link(chat)}
         """
+
         reply_message(request, reply_with)
 
       {:error, changeset} ->
@@ -58,7 +67,11 @@ defmodule QuoteBookBot.Commands.SaveQuote do
           reply_message(request, error)
         else
           Logger.error(inspect(changeset))
-          reply_message(request, "Неизвестная ошибка. Сбрасываю ядерную боеголовку на разработчика")
+
+          reply_message(
+            request,
+            "Неизвестная ошибка. Сбрасываю ядерную боеголовку на разработчика"
+          )
         end
     end
   end

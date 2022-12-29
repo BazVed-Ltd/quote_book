@@ -512,6 +512,14 @@ defmodule QuoteBook.Book do
 
   """
   def get_chat!(id), do: Repo.get!(Chat, id)
+  def get_chat(id), do: Repo.get(Chat, id)
+
+  def get_chat_by_slug(slug) do
+    query = from c in Chat,
+            where: c.slug == ^slug
+
+    Repo.one(query)
+  end
 
   def get_or_new_chat(id) do
     case Repo.get(Chat, id) do

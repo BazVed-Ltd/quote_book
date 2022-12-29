@@ -54,7 +54,8 @@ defmodule QuoteBook.MixProject do
       {:quantum, "~> 3.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:vk_bot, github: "waika28/vk_bot"},
+      {:ecto_autoslug_field, github: "Waika28/ecto_autoslug_field"},
+      {:vk_bot, github: "Waika28/vk_bot"},
     ]
   end
 
