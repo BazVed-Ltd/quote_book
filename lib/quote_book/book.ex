@@ -12,7 +12,7 @@ defmodule QuoteBook.Book do
   @raw_sql_all_messages """
   SELECT *
   FROM messages
-  WHERE quote_id IS NOT null AND peer_id = ?
+  WHERE quote_id IS NOT null AND NOT deleted AND peer_id = ?
   UNION ALL
   SELECT n.*
   FROM messages n
@@ -41,21 +41,29 @@ defmodule QuoteBook.Book do
   end
 
   def list_chats() do
-    Repo.all(Chat)
+    query =
+      from c in Chat,
+        select_merge: %{
+          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
+        }
+
+    Repo.all(query)
   end
 
-  def quotes_count(peer_id) do
+  def get_last_quote_id(peer_id) do
     query =
-      from m in Message,
-        where: m.peer_id == ^peer_id
+      from(m in Message,
+        where: m.peer_id == ^peer_id,
+        select: max(m.quote_id)
+      )
 
-    Repo.aggregate(query, :count, :quote_id)
+    Repo.one!(query)
   end
 
   @raw_sql_message_tree """
   SELECT *
   FROM messages
-  WHERE quote_id = ?
+  WHERE peer_id = ? AND quote_id = ?
   UNION ALL
   SELECT n.*
   FROM messages n
@@ -76,11 +84,11 @@ defmodule QuoteBook.Book do
       ** (Ecto.NoResultsError)
 
   """
-  def get_quote!(id) do
+  def get_quote(peer_id, quote_id) do
     query =
       {"message_tree", Message}
       |> recursive_ctes(true)
-      |> with_cte("message_tree", as: fragment(@raw_sql_message_tree, ^id))
+      |> with_cte("message_tree", as: fragment(@raw_sql_message_tree, ^peer_id, ^quote_id))
       |> preload([:attachments, :from])
 
     Repo.all(query)
@@ -134,9 +142,9 @@ defmodule QuoteBook.Book do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_quote_from_message(attrs \\ %{}) do
+  def create_quote_from_message(attrs \\ %{}, deep) do
     %Message{}
-    |> Message.changeset(attrs)
+    |> Message.changeset(attrs, deep)
     |> Repo.insert()
   end
 
@@ -170,8 +178,82 @@ defmodule QuoteBook.Book do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_message(%Message{} = message) do
-    Repo.delete(message)
+  def maybe_delete_quote(peer_id, quote_id, from_id) do
+    query =
+      from m in Message,
+        where:
+          m.peer_id == ^peer_id and m.quote_id == ^quote_id and m.from_id == ^from_id and
+            not m.deleted
+
+    maybe_delete_or_update_by_query(query)
+  end
+
+  def maybe_delete_quote_by_admin(peer_id, quote_id) do
+    query =
+      from m in Message,
+        where: m.peer_id == ^peer_id and m.quote_id == ^quote_id and not m.deleted
+
+    maybe_delete_or_update_by_query(query)
+  end
+
+  defp maybe_delete_or_update_by_query(query) do
+    query
+    |> Repo.one()
+    |> maybe_delete_or_update()
+  end
+
+  defp maybe_delete_or_update(nil), do: :nothing
+
+  defp maybe_delete_or_update(quote_message) do
+    last_quote_id = get_last_quote_id(quote_message.peer_id)
+
+    if quote_message.quote_id == last_quote_id do
+      Repo.delete!(quote_message)
+    else
+      query =
+        from m in Message,
+          where: m.quote_id == ^quote_message.quote_id,
+          update: [set: [deleted: true]]
+
+      Repo.update_all(query, [])
+    end
+
+    :deleted
+  end
+
+  def maybe_delete_last_quote(peer_id, from_id) do
+    last_quote_id = get_last_quote_id(peer_id)
+
+    query =
+      from m in Message,
+        where:
+          m.peer_id == ^peer_id and m.quote_id == ^last_quote_id and m.from_id == ^from_id and
+            not m.deleted
+
+    maybe_delete_last_by_query(query)
+  end
+
+  def maybe_delete_last_quote_by_admin(peer_id) do
+    last_quote_id = get_last_quote_id(peer_id)
+
+    query =
+      from m in Message,
+        where: m.peer_id == ^peer_id and m.quote_id == ^last_quote_id and not m.deleted
+
+    maybe_delete_last_by_query(query)
+  end
+
+  defp maybe_delete_last_by_query(query) do
+    query
+    |> Repo.one()
+    |> maybe_delete_last()
+  end
+
+  defp maybe_delete_last(nil), do: :nothing
+
+  defp maybe_delete_last(quote_message) do
+    Repo.delete!(quote_message)
+    :deleted
   end
 
   @doc """
@@ -435,10 +517,48 @@ defmodule QuoteBook.Book do
       ** (Ecto.NoResultsError)
 
   """
-  def get_chat!(id), do: Repo.get!(Chat, id)
+  def get_chat!(id) do
+    query =
+      from c in Chat,
+        select_merge: %{
+          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
+        },
+        where: c.id == ^id
+
+    Repo.one!(query)
+  end
+
+  def get_chat(id) do
+    query =
+      from c in Chat,
+        select_merge: %{
+          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
+        },
+        where: c.id == ^id
+
+    Repo.one(query)
+  end
+
+  def get_chat_by_slug(slug) do
+    query =
+      from c in Chat,
+        select_merge: %{
+          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
+        },
+        where: c.slug == ^slug
+
+    Repo.one(query)
+  end
+
+  def get_chat_by_slug_or_id(text) do
+    case Integer.parse(text) do
+      {peer_id, ""} -> get_chat(peer_id)
+      _otherwise -> get_chat_by_slug(text)
+    end
+  end
 
   def get_or_new_chat(id) do
-    case Repo.get(Chat, id) do
+    case get_chat(id) do
       nil -> %Chat{id: id}
       chat -> chat
     end

@@ -5,7 +5,7 @@ defmodule QuoteBookWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
-    plug :put_root_layout, {QuoteBookWeb.LayoutView, :root}
+    plug :put_root_layout, {QuoteBookWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
@@ -19,6 +19,7 @@ defmodule QuoteBookWeb.Router do
 
     live "/", IndexLive
     live "/:peer_id", ChatLive
+    live "/:peer_id/:quote_id", QuoteLive
   end
 
   # Other scopes may use custom stacks.

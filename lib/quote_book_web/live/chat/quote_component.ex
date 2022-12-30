@@ -1,24 +1,23 @@
 defmodule QuoteBookWeb.QuoteComponent do
-  alias QuoteBookWeb.QuoteComponent
   use QuoteBookWeb, :component
 
-  @links_regex ~r/\[(id|club)([0-9]+)\|(.+?)\]/
+  alias Phoenix.HTML
 
-  alias __MODULE__
+  @links_regex ~r/\[(id|club)([0-9]+)\|(.+?)\]/
 
   def quotes(assigns) do
     ~H"""
     <ul class="flex flex-col max-w-lg px-3 sm:px-0 mx-auto">
       <%= for quote_message <- @quotes do %>
         <li>
-          <QuoteComponent.quote quote={quote_message} />
+          <.message_quote quote={quote_message} />
         </li>
       <% end %>
     </ul>
     """
   end
 
-  def quote(assigns) do
+  def message_quote(assigns) do
     nested_messages = fetch_nested_messages(assigns.quote)
 
     author = assigns.quote.from
@@ -27,22 +26,31 @@ defmodule QuoteBookWeb.QuoteComponent do
     date =
       assigns.quote.inserted_at
       |> DateTime.from_naive!("Etc/UTC")
-      |> DateTime.to_unix()
+
+    date_str =
+      date
+      |> DateTime.add(3, :hour)
+      |> Calendar.strftime("%d.%m.%Y в %H:%M")
 
     ~H"""
     <div class='card mb-5'>
       <div class='flex border-b border-zinc-700 pb-2 mb-3'>
         <div>#<%= @quote.quote_id %></div>
-        <div id={"#{@quote.quote_id}-date"} class='ml-auto' phx-hook="setTime" data-timestamp={date}></div>
+        <div
+          id={"quote-#{@quote.quote_id}-date"}
+          class='ml-auto'
+          phx-hook="setTime"
+          data-timestamp={DateTime.to_unix(date)}
+        ><%= date_str %></div>
       </div>
 
       <div class="mb-3">
-        <QuoteComponent.nested_messages messages={nested_messages} />
+        <.nested_messages messages={nested_messages} top_level={true} />
       </div>
 
       <div class='flex'>
         <div class='ml-auto'>
-          Схоронил <a class='text-blue-400' href={author_url}><%= author.name %></a>
+          Схоронил <a href={author_url}><%= author.name %></a>
         </div>
       </div>
     </div>
@@ -63,11 +71,14 @@ defmodule QuoteBookWeb.QuoteComponent do
   end
 
   def nested_messages(assigns) do
+    top_level = Map.get(assigns, :top_level, false)
+
     ~H"""
     <ul>
-      <%= for message <- @messages do %>
-        <li class="mb-4 last:mb-0">
-          <QuoteComponent.nested_message message={message} />
+      <%= for [prev, message] <- Stream.chunk_every([nil | @messages], 2, 1) do %>
+        <% collapse = prev && prev.from.id == message.from.id && message.date - prev.date < 120 %>
+        <li class="mt-4 first:mt-0">
+          <.nested_message message={message} top_level={top_level} collapse={collapse}/>
         </li>
       <% end %>
     </ul>
@@ -88,21 +99,39 @@ defmodule QuoteBookWeb.QuoteComponent do
 
     strings =
       if render_text? do
-        assigns.message.text |> format_links
+        assigns.message.text |> format_text
       end
 
     nested_messages = fetch_nested_messages(assigns.message)
 
-    ~H"""
-    <div class="flex">
-      <div class="flex-none w-11">
-        <img class="w-11 h-11 rounded-full" src={from.current_photo} alt="Аватар"/>
-      </div>
-      <div class="flex-initial pl-2">
-        <a class="text-blue-400" href={from_url}><%= from.name %></a>
-        <span id={"#{@message.id}-time"} phx-hook="setTime" data-time-only="true" data-timestamp={@message.date} class="text-gray-500">
-        </span>
+    date_str =
+      assigns.message.date
+      |> DateTime.from_unix!()
+      |> DateTime.add(3, :hour)
+      |> Calendar.strftime("%H:%M")
 
+    ~H"""
+    <div class={"grid gap-x-2 " <> if @collapse, do: "grid-cols-collapsed-message", else: "grid-cols-message"}>
+      <%= unless @collapse do %>
+        <div class="w-11 row-span-2">
+          <img class="w-11 h-11 rounded-full" src={from.current_photo} alt="Аватар"/>
+        </div>
+
+        <div>
+          <a href={from_url}><%= from.name %></a>
+        <%= unless @top_level, do: HTML.raw "</div><div>" %>
+          <span
+            id={"message-#{@message.id}-time"}
+            phx-hook="setTime"
+            data-time-only="true"
+            data-timestamp={@message.date}
+            class="text-gray-500"
+            ><%= date_str %></span>
+        </div>
+      <% end %>
+
+
+      <div class={(unless @top_level, do: "col-span-2", else: "") <> " " <> if @top_level and @collapse, do: "ml-top-collapsed", else: "" }>
         <%= if render_text? do %>
           <p class='mb-4 last:mb-0'>
             <%= for string <- strings, do: string %>
@@ -111,15 +140,15 @@ defmodule QuoteBookWeb.QuoteComponent do
 
         <%= if @message.attachments != [] do %>
           <div class="mt-2">
-            <QuoteComponent.attachments attachments={@message.attachments} />
+            <.attachments attachments={@message.attachments} />
           </div>
         <% end %>
       </div>
     </div>
     <%= if nested_messages != [] do %>
-      <div class="ml-3 mt-4">
-          <div class='border-l border-zinc-600 pl-4'>
-            <QuoteComponent.nested_messages messages={nested_messages} />
+      <div class={"ml-1 mt-4 " <> if @top_level, do: "pl-nested", else: ""}>
+          <div class='border-l-2 border-zinc-600 pl-1'>
+            <.nested_messages messages={nested_messages} />
           </div>
       </div>
     <% end %>
@@ -131,7 +160,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     <ul class="flex flex-wrap gap-1">
       <%= for attachment <- @attachments do %>
         <li>
-          <QuoteComponent.attachment attachment={attachment} />
+          <.attachment attachment={attachment} />
         </li>
       <% end %>
     </ul>
@@ -141,12 +170,7 @@ defmodule QuoteBookWeb.QuoteComponent do
   def attachment(assigns) do
     case assigns.attachment.type do
       :doc when assigns.attachment.ext == "mp4" ->
-        ~H"""
-        <video autoplay loop muted>
-          <source src={@attachment.path} type="video/mp4" />
-          Ваш браузер не поддерживает HTML5 аудио.
-        </video>
-        """
+        ~H"<video autoplay loop muted src={@attachment.path} type='video/mp4' />"
 
       type when type in ~w(photo doc graffiti)a ->
         ~H"<img class='object-scale-down w-full h-full align-middle' src={@attachment.path} />"
@@ -155,19 +179,14 @@ defmodule QuoteBookWeb.QuoteComponent do
         ~H"<img class='object-scale-down w-40 h-40 align-middle' src={@attachment.path} />"
 
       :audio_message ->
-        ~H"""
-        <audio controls>
-          <source src={@attachment.path} type="audio/mpeg">
-          <p>Ваш браузер не поддерживает HTML5 аудио.</p>
-        </audio>
-        """
+        ~H"<audio controls src={@attachment.path} type='audio/mpeg' />"
 
       _ ->
         ~H"<span><a href={@attachment.path}><%= @attachment.type %></a></span>"
     end
   end
 
-  defp format_links(text) do
+  defp format_text(text) do
     text
     |> split_with_links()
     |> map_to_html()
@@ -182,16 +201,23 @@ defmodule QuoteBookWeb.QuoteComponent do
       result = Regex.run(@links_regex, string)
 
       if is_nil(result) do
-        [string]
+        insert_new_lines(string)
       else
         [_, type, id, text] = result
 
         [
-          Phoenix.HTML.raw("<a class=\"text-blue-400\" href=\"https://vk.com/#{type}#{id}\">"),
-          text,
-          Phoenix.HTML.raw("</a>")
+          HTML.raw("<a href=\"https://vk.com/#{type}#{id}\">"),
+          insert_new_lines(text),
+          HTML.raw("</a>")
         ]
+        |> List.flatten()
       end
     end)
+  end
+
+  defp insert_new_lines(text) do
+    text
+    |> String.split("\n")
+    |> Enum.intersperse(HTML.raw("<br />"))
   end
 end

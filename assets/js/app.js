@@ -18,6 +18,10 @@
 //     import "some-package"
 //
 
+console.log(`╔═══════════════════════════════╗
+║Powered by Grand Catware Server║
+╚═══════════════════════════════╝`)
+
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
 // Establish Phoenix Socket and LiveView configuration.
@@ -35,6 +39,9 @@ Hooks.setTime = {
     const date = new Date(timestamp);
 
     const timeZone   = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (timeZone == "Europe/Moscow") return;
+  
     if (timeOnly) {
       this.el.innerText = date.toLocaleString("ru-RU", {timeZone, dateStyle: undefined, timeStyle: "short"});
     } else {

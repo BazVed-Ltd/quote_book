@@ -10,6 +10,8 @@ defmodule QuoteBook.Repo.Migrations.CreateMessages do
       add :reply_message_id, references(:messages, on_delete: :delete_all)
       add :fwd_from_message_id, references(:messages, on_delete: :delete_all)
 
+      add :deleted, :boolean
+
       add :date, :bigint
 
       timestamps()

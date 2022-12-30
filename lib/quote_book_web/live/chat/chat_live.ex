@@ -1,47 +1,49 @@
 defmodule QuoteBookWeb.ChatLive do
   use QuoteBookWeb, :live_view
 
+  import Phoenix.LiveView
+
   alias QuoteBook.Book
   alias QuoteBookWeb.QuoteComponent
 
+  on_mount {QuoteBookWeb.Helpers.Loader, :chat}
+
   @impl true
-  def mount(params, _session, socket) do
-    peer_id =
-      params
-      |> Map.fetch!("peer_id")
-      |> String.to_integer()
-
-    quotes = Book.list_quotes(peer_id)
-
-    chat = Book.get_chat!(peer_id)
+  def mount(_params, _session, socket) do
+    quotes = Book.list_quotes(socket.assigns.chat.id)
 
     {:ok,
      socket
-     |> assign(chat: chat, quotes: quotes)
-     |> assign_title(chat.title)
-     |> assign_covers(chat.covers)}
+     |> assign(quotes: quotes)
+     |> assign_title()
+     |> assign_covers()}
   end
 
-  defp assign_title(socket, nil) do
+  defp assign_title(socket) when is_binary(socket.assigns.chat.title) do
+    title = socket.assigns.chat.title
+    assign(socket, render_title?: true, title: title, page_title: title)
+  end
+
+  defp assign_title(socket) do
     assign(socket, render_title?: false)
   end
 
-  defp assign_title(socket, title) do
-    assign(socket, render_title?: true, title: title)
+  def assign_covers(socket) do
+    do_assign_covers(socket, socket.assigns.chat.covers)
   end
 
-  defp assign_covers(socket, []) do
+  defp do_assign_covers(socket, []) do
     assign(socket, render_cover?: false)
   end
 
-  defp assign_covers(socket, [cover]) do
+  defp do_assign_covers(socket, [cover]) do
     assign(socket,
       render_cover?: true,
       cover: cover
     )
   end
 
-  defp assign_covers(socket, covers) do
+  defp do_assign_covers(socket, covers) do
     cover_queue = Enum.reduce(Enum.shuffle(covers), :queue.new(), &:queue.in(&1, &2))
 
     {current, next_covers} = queue_cycle(cover_queue)
