@@ -26,18 +26,22 @@ defmodule QuoteBookWeb.QuoteComponent do
     date =
       assigns.quote.inserted_at
       |> DateTime.from_naive!("Etc/UTC")
-      |> DateTime.to_unix()
+
+    date_str =
+      date
+      |> DateTime.add(3, :hour)
+      |> Calendar.strftime("%d.%m.%Y в %H:%M")
 
     ~H"""
     <div class='card mb-5'>
       <div class='flex border-b border-zinc-700 pb-2 mb-3'>
         <div>#<%= @quote.quote_id %></div>
         <div
-          id={"#{@quote.quote_id}-date"}
+          id={"quote-#{@quote.quote_id}-date"}
           class='ml-auto'
           phx-hook="setTime"
-          data-timestamp={date}
-        ></div>
+          data-timestamp={DateTime.to_unix(date)}
+        ><%= date_str %></div>
       </div>
 
       <div class="mb-3">
@@ -100,6 +104,12 @@ defmodule QuoteBookWeb.QuoteComponent do
 
     nested_messages = fetch_nested_messages(assigns.message)
 
+    date_str =
+      assigns.message.date
+      |> DateTime.from_unix!()
+      |> DateTime.add(3, :hour)
+      |> Calendar.strftime("%H:%M")
+
     ~H"""
     <div class={"grid gap-x-2 " <> if @collapse, do: "grid-cols-collapsed-message", else: "grid-cols-message"}>
       <%= unless @collapse do %>
@@ -111,13 +121,12 @@ defmodule QuoteBookWeb.QuoteComponent do
           <a href={from_url}><%= from.name %></a>
         <%= unless @top_level, do: HTML.raw "</div><div>" %>
           <span
-            id={"#{@message.id}-time"}
+            id={"message-#{@message.id}-time"}
             phx-hook="setTime"
             data-time-only="true"
             data-timestamp={@message.date}
             class="text-gray-500"
-            >
-          </span>
+            ><%= date_str %></span>
         </div>
       <% end %>
 

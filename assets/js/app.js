@@ -35,6 +35,9 @@ Hooks.setTime = {
     const date = new Date(timestamp);
 
     const timeZone   = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (timeZone == "Europe/Moscow") return;
+  
     if (timeOnly) {
       this.el.innerText = date.toLocaleString("ru-RU", {timeZone, dateStyle: undefined, timeStyle: "short"});
     } else {
