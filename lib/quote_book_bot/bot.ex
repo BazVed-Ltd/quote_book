@@ -6,7 +6,8 @@ defmodule QuoteBookBot.Bot do
       Commands.SaveQuote,
       Commands.SaveChatName,
       Commands.AddCoverToChat,
-      Commands.DeleteQuote
+      Commands.DeleteQuote,
+      Commands.Help,
     ]
   end
 end

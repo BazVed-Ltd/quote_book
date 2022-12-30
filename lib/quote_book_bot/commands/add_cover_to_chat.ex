@@ -1,5 +1,5 @@
 defmodule QuoteBookBot.Commands.AddCoverToChat do
-  import VkBot.CommandsManager
+  import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 
   alias QuoteBook.Book

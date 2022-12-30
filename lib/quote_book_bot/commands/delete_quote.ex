@@ -1,5 +1,5 @@
 defmodule QuoteBookBot.Commands.DeleteQuote do
-  import VkBot.CommandsManager
+  import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 
   alias QuoteBook.Book

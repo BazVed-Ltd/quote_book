@@ -1,5 +1,5 @@
 defmodule QuoteBookBot.Commands.SaveChatName do
-  import VkBot.CommandsManager
+  import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 
   alias QuoteBookBot.Utils.Links

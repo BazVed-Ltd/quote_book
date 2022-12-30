@@ -1,5 +1,5 @@
 defmodule QuoteBookBot.Commands.SaveQuote do
-  import VkBot.CommandsManager
+  import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 
   require Logger
