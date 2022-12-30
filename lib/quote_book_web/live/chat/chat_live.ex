@@ -6,48 +6,44 @@ defmodule QuoteBookWeb.ChatLive do
   alias QuoteBook.Book
   alias QuoteBookWeb.QuoteComponent
 
+  on_mount {QuoteBookWeb.Helpers.Loader, :chat}
+
   @impl true
-  def mount(params, _session, socket) do
-    peer_id = Map.fetch!(params, "peer_id")
+  def mount(_params, _session, socket) do
+    quotes = Book.list_quotes(socket.assigns.chat.id)
 
-    chat = Book.get_chat_by_slug_or_id(peer_id)
-
-    if is_nil(chat) do
-      {:ok,
-       socket
-       |> push_redirect(to: "/")
-       |> put_flash(:error, "ОШИБКА!!! Нет такого чата")}
-    else
-      quotes = Book.list_quotes(chat.id)
-
-      {:ok,
-       socket
-       |> assign(chat: chat, quotes: quotes)
-       |> assign_title(chat.title)
-       |> assign_covers(chat.covers)}
-    end
+    {:ok,
+     socket
+     |> assign(quotes: quotes)
+     |> assign_title()
+     |> assign_covers()}
   end
 
-  defp assign_title(socket, nil) do
-    assign(socket, render_title?: false)
-  end
-
-  defp assign_title(socket, title) do
+  defp assign_title(socket) when is_binary(socket.assigns.chat.title) do
+    title = socket.assigns.chat.title
     assign(socket, render_title?: true, title: title, page_title: title)
   end
 
-  defp assign_covers(socket, []) do
+  defp assign_title(socket) do
+    assign(socket, render_title?: false)
+  end
+
+  def assign_covers(socket) do
+    do_assign_covers(socket, socket.assigns.chat.covers)
+  end
+
+  defp do_assign_covers(socket, []) do
     assign(socket, render_cover?: false)
   end
 
-  defp assign_covers(socket, [cover]) do
+  defp do_assign_covers(socket, [cover]) do
     assign(socket,
       render_cover?: true,
       cover: cover
     )
   end
 
-  defp assign_covers(socket, covers) do
+  defp do_assign_covers(socket, covers) do
     cover_queue = Enum.reduce(Enum.shuffle(covers), :queue.new(), &:queue.in(&1, &2))
 
     {current, next_covers} = queue_cycle(cover_queue)
