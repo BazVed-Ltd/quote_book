@@ -17,6 +17,10 @@ defmodule QuoteBookWeb do
   and import those modules here.
   """
 
+  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
+
+  def static_attachments, do: "attachments"
+
   def controller do
     quote do
       use Phoenix.Controller, namespace: QuoteBookWeb
@@ -24,30 +28,17 @@ defmodule QuoteBookWeb do
       import Plug.Conn
       import QuoteBookWeb.Gettext
       alias QuoteBookWeb.Router.Helpers, as: Routes
-    end
-  end
 
-  def view do
-    quote do
-      use Phoenix.View,
-        root: "lib/quote_book_web/templates",
-        namespace: QuoteBookWeb
-
-      # Import convenience functions from controllers
-      import Phoenix.Controller,
-        only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
-
-      # Include shared imports and aliases for views
-      unquote(view_helpers())
+      unquote(verified_routes())
     end
   end
 
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {QuoteBookWeb.LayoutView, "live.html"}
+        layout: {QuoteBookWeb.Layouts, :app}
 
-      unquote(view_helpers())
+      unquote(html_helpers())
     end
   end
 
@@ -56,6 +47,7 @@ defmodule QuoteBookWeb do
       use Phoenix.LiveComponent
 
       unquote(view_helpers())
+      unquote(html_helpers())
     end
   end
 
@@ -92,12 +84,48 @@ defmodule QuoteBookWeb do
       # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
       import Phoenix.LiveView.Helpers
 
-      # Import basic rendering functionality (render, render_layout, etc)
-      import Phoenix.View
-
-      import QuoteBookWeb.ErrorHelpers
       import QuoteBookWeb.Gettext
       alias QuoteBookWeb.Router.Helpers, as: Routes
+
+      unquote(verified_routes())
+    end
+  end
+
+  def html do
+    quote do
+      use Phoenix.Component
+
+      # Import convenience functions from controllers
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+
+      # Include general helpers for rendering HTML
+      unquote(html_helpers())
+    end
+  end
+
+  defp html_helpers do
+    quote do
+      # HTML escaping functionality
+      import Phoenix.HTML
+      # Core UI components and translation
+      import QuoteBookWeb.CoreComponents
+      import QuoteBookWeb.Gettext
+
+      # Shortcut for generating JS commands
+      alias Phoenix.LiveView.JS
+
+      # Routes generation with the ~p sigil
+      unquote(verified_routes())
+    end
+  end
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: QuoteBookWeb.Endpoint,
+        router: QuoteBookWeb.Router,
+        statics: [QuoteBookWeb.static_attachments() | QuoteBookWeb.static_paths()]
     end
   end
 

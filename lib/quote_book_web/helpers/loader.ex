@@ -1,6 +1,10 @@
 defmodule QuoteBookWeb.Helpers.Loader do
   import Phoenix.LiveView
 
+  import Phoenix.Component
+
+  use Phoenix.VerifiedRoutes, endpoint: QuoteBookWeb.Endpoint, router: QuoteBookWeb.Router
+
   alias QuoteBook.Book
 
   defp redirect_on_error(socket, opts) do
@@ -9,7 +13,7 @@ defmodule QuoteBookWeb.Helpers.Loader do
 
     {:halt,
      socket
-     |> push_redirect(to: to)
+     |> redirect(to: to)
      |> put_flash(:error, error)}
   end
 
@@ -20,7 +24,7 @@ defmodule QuoteBookWeb.Helpers.Loader do
       |> Book.get_chat_by_slug_or_id()
 
     if is_nil(chat) do
-      redirect_on_error(socket, to: "/", error: "ОШИБКА!!! Нет такого чата")
+      redirect_on_error(socket, to: ~p"/", error: "Нет такого чата")
     else
       {:cont, assign(socket, chat: chat)}
     end
@@ -40,8 +44,8 @@ defmodule QuoteBookWeb.Helpers.Loader do
       # FIXME: Исправить путь до цитаты
       _otherwise ->
         redirect_on_error(socket,
-          to: "/#{socket.assigns.chat.id}",
-          error: "ОШИБКА!!! Нет такой цитаты"
+          to: ~p"/#{socket.assigns.chat.id}",
+          error: "Нет такой цитаты"
         )
     end
   end

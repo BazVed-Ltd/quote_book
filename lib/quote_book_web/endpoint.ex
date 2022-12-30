@@ -20,10 +20,10 @@ defmodule QuoteBookWeb.Endpoint do
     at: "/",
     from: :quote_book,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only: QuoteBookWeb.static_paths()
 
   plug Plug.Static,
-    at: "/attachments",
+    at: QuoteBookWeb.static_attachments(),
     from: Application.compile_env!(:quote_book, :attachments_directory)
 
   # Code reloading can be explicitly enabled under the
