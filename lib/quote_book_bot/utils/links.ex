@@ -4,34 +4,20 @@ defmodule QuoteBookBot.Utils.Links do
   end
 
   def chat_link(chat) do
-    slug_or_id =
-      if is_nil(chat.slug) do
-        chat.id
-      else
-        chat.slug
-      end
-
     path = QuoteBookWeb.Router.Helpers.live_path(
       QuoteBookWeb.Endpoint,
       QuoteBookWeb.ChatLive,
-      slug_or_id
+      chat.slug_or_id
     )
 
     host() <> path
   end
 
   def quote_link(chat, message_quote) do
-    slug_or_id =
-      if is_nil(chat.slug) do
-        chat.id
-      else
-        chat.slug
-      end
-
     path = QuoteBookWeb.Router.Helpers.live_path(
       QuoteBookWeb.Endpoint,
       QuoteBookWeb.QuoteLive,
-      slug_or_id,
+      chat.slug_or_id,
       message_quote.quote_id
     )
 

@@ -41,7 +41,13 @@ defmodule QuoteBook.Book do
   end
 
   def list_chats() do
-    Repo.all(Chat)
+    query =
+      from c in Chat,
+        select_merge: %{
+          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
+        }
+
+    Repo.all(query)
   end
 
   def get_last_quote_id(peer_id) do
@@ -511,12 +517,35 @@ defmodule QuoteBook.Book do
       ** (Ecto.NoResultsError)
 
   """
-  def get_chat!(id), do: Repo.get!(Chat, id)
-  def get_chat(id), do: Repo.get(Chat, id)
+  def get_chat!(id) do
+    query =
+      from c in Chat,
+        select_merge: %{
+          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
+        },
+        where: c.id == ^id
+
+    Repo.one!(query)
+  end
+
+  def get_chat(id) do
+    query =
+      from c in Chat,
+        select_merge: %{
+          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
+        },
+        where: c.id == ^id
+
+    Repo.one(query)
+  end
 
   def get_chat_by_slug(slug) do
-    query = from c in Chat,
-            where: c.slug == ^slug
+    query =
+      from c in Chat,
+        select_merge: %{
+          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
+        },
+        where: c.slug == ^slug
 
     Repo.one(query)
   end
@@ -529,7 +558,7 @@ defmodule QuoteBook.Book do
   end
 
   def get_or_new_chat(id) do
-    case Repo.get(Chat, id) do
+    case get_chat(id) do
       nil -> %Chat{id: id}
       chat -> chat
     end

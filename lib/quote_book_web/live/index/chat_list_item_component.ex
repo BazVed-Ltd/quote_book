@@ -13,12 +13,7 @@ defmodule QuoteBookWeb.ChatListItemComponent do
         chat.title
       end
 
-    chat_link =
-      if is_nil(chat.slug) do
-        Routes.live_path(assigns.socket, ChatLive, chat.id)
-      else
-        Routes.live_path(assigns.socket, ChatLive, chat.slug)
-      end
+    chat_link = Routes.live_path(assigns.socket, ChatLive, chat.slug_or_id)
 
     ~H"""
     <li><%= live_redirect chat_link_text, to: chat_link %></li>

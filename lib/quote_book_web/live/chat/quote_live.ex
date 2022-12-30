@@ -9,7 +9,6 @@ defmodule QuoteBookWeb.QuoteLive do
   end
 
   def render(assigns) do
-    IO.inspect(assigns.quote)
     ~H"""
     <div class="flex flex-col max-w-lg px-3 sm:px-0 mx-auto my-5">
       <QuoteBookWeb.QuoteComponent.message_quote quote={@quote} />

@@ -10,6 +10,8 @@ defmodule QuoteBook.Book.Chat do
 
     field :slug, TitleSlug.Type
 
+    field :slug_or_id, :string, virtual: true
+
     timestamps()
   end
 
