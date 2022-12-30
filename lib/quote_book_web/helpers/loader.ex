@@ -3,6 +3,16 @@ defmodule QuoteBookWeb.Helpers.Loader do
 
   alias QuoteBook.Book
 
+  defp redirect_on_error(socket, opts) do
+    to = Keyword.get(opts, :to, "/")
+    error = Keyword.get(opts, :error, "ОШИБКА!!!")
+
+    {:halt,
+     socket
+     |> push_redirect(to: to)
+     |> put_flash(:error, error)}
+  end
+
   def on_mount(:chat, params, _session, socket) do
     chat =
       params
@@ -10,12 +20,29 @@ defmodule QuoteBookWeb.Helpers.Loader do
       |> Book.get_chat_by_slug_or_id()
 
     if is_nil(chat) do
-      {:halt,
-       socket
-       |> push_redirect(to: "/")
-       |> put_flash(:error, "ОШИБКА!!! Нет такого чата")}
+      redirect_on_error(socket, to: "/", error: "ОШИБКА!!! Нет такого чата")
     else
       {:cont, assign(socket, chat: chat)}
+    end
+  end
+
+  def on_mount(:quote, params, _session, socket) do
+    unless Map.has_key?(socket.assigns, :chat),
+      do: throw("Before assigning a quote, you need to assign chat")
+
+    with {quote_id, ""} <- params |> Map.fetch!("quote_id") |> Integer.parse(),
+         quote_message when not is_nil(quote_message) <-
+           Book.get_quote(socket.assigns.chat.id, quote_id) do
+      {:cont,
+       socket
+       |> assign(quote: quote_message)}
+    else
+      # FIXME: Исправить путь до цитаты
+      _otherwise ->
+        redirect_on_error(socket,
+          to: "/#{socket.assigns.chat.id}",
+          error: "ОШИБКА!!! Нет такой цитаты"
+        )
     end
   end
 end

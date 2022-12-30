@@ -57,7 +57,7 @@ defmodule QuoteBook.Book do
   @raw_sql_message_tree """
   SELECT *
   FROM messages
-  WHERE quote_id = ?
+  WHERE peer_id = ? AND quote_id = ?
   UNION ALL
   SELECT n.*
   FROM messages n
@@ -78,11 +78,11 @@ defmodule QuoteBook.Book do
       ** (Ecto.NoResultsError)
 
   """
-  def get_quote!(id) do
+  def get_quote(peer_id, quote_id) do
     query =
       {"message_tree", Message}
       |> recursive_ctes(true)
-      |> with_cte("message_tree", as: fragment(@raw_sql_message_tree, ^id))
+      |> with_cte("message_tree", as: fragment(@raw_sql_message_tree, ^peer_id, ^quote_id))
       |> preload([:attachments, :from])
 
     Repo.all(query)

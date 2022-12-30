@@ -34,10 +34,10 @@ defmodule QuoteBookBot.Commands.SaveQuote do
       end
 
     case QuoteBook.Book.create_quote_from_message(message, deep) do
-      {:ok, _message_quote} ->
+      {:ok, message_quote} ->
         reply_with = """
         Добавил.
-        #{Links.chat_link(chat)}
+        #{Links.quote_link(chat, message_quote)}
         """
 
         reply_message(request, reply_with)
