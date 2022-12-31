@@ -6,7 +6,6 @@ defmodule QuoteBookBot.Commands.SaveQuote do
 
   alias QuoteBookBot.Utils.{UserLoader, Attachments, ReplyMessages, Links}
 
-
   defcommand request,
     predicate: [on_text: "/сьлржалсч", in: :chat] do
     message =
@@ -14,8 +13,9 @@ defmodule QuoteBookBot.Commands.SaveQuote do
       |> ReplyMessages.insert_reply_message()
       |> Attachments.insert_attachments()
 
-    chat = QuoteBook.Book.get_or_new_chat(message["peer_id"])
-    QuoteBook.Book.create_or_update_chat(chat, %{})
+    {:ok, chat} =
+      QuoteBook.Book.get_or_new_chat(message["peer_id"])
+      |> QuoteBook.Book.create_or_update_chat(%{})
 
     UserLoader.message_to_users_list(message)
     |> QuoteBook.Book.reject_exists_user()
