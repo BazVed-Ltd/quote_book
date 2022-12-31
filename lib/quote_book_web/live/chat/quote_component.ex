@@ -159,7 +159,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     ~H"""
     <ul class="flex flex-wrap gap-1">
       <%= for attachment <- @attachments do %>
-        <li>
+        <li class="flex-50">
           <.attachment attachment={attachment} />
         </li>
       <% end %>

@@ -28,6 +28,10 @@ a:hover {
   padding-left: 3.25rem;
 }
 
+.flex-50 {
+  flex: calc(100% / 3);
+}
+
 /* Alerts and form errors used by phx.new */
 .alert {
   padding: 15px;
