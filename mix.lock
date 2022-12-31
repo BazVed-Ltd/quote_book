@@ -57,7 +57,7 @@
   "telemetry_registry": {:hex, :telemetry_registry, "0.3.0", "6768f151ea53fc0fbca70dbff5b20a8d663ee4e0c0b2ae589590e08658e76f1e", [:mix, :rebar3], [{:telemetry, "~> 1.0", [hex: :telemetry, repo: "hexpm", optional: false]}], "hexpm", "492e2adbc609f3e79ece7f29fec363a97a2c484ac78a83098535d6564781e917"},
   "unicode_util_compat": {:hex, :unicode_util_compat, "0.7.0", "bc84380c9ab48177092f43ac89e4dfa2c6d62b40b8bd132b1059ecc7232f9a78", [:rebar3], [], "hexpm", "25eee6d67df61960cf6a794239566599b09e17e668d3700247bc498638152521"},
   "vix": {:hex, :vix, "0.15.1", "e8e32feed02659f4a7bde3877dcd96eb64c685dd09597045be95966845a7a405", [:make, :mix], [{:elixir_make, "~> 0.6", [hex: :elixir_make, repo: "hexpm", optional: false]}, {:kino, "~> 0.7", [hex: :kino, repo: "hexpm", optional: true]}], "hexpm", "e3a132598e97bac04f96de98072baa621264afbabbf6f4031dc7eb373e627e8b"},
-  "vk_bot": {:git, "https://github.com/Waika28/vk_bot.git", "1fed921fcdb1c0336fd683db13c9ee1918111f8e", []},
+  "vk_bot": {:git, "https://github.com/Waika28/vk_bot.git", "1bd9ab4ba49b035814040f350f681bd41d0c2fe0", []},
   "websock": {:hex, :websock, "0.4.3", "184ac396bdcd3dfceb5b74c17d221af659dd559a95b1b92041ecb51c9b728093", [:mix], [], "hexpm", "5e4dd85f305f43fd3d3e25d70bec4a45228dfed60f0f3b072d8eddff335539cf"},
   "websock_adapter": {:hex, :websock_adapter, "0.4.5", "30038a3715067f51a9580562c05a3a8d501126030336ffc6edb53bf57d6d2d26", [:mix], [{:bandit, "~> 0.6", [hex: :bandit, repo: "hexpm", optional: true]}, {:plug, "~> 1.14", [hex: :plug, repo: "hexpm", optional: false]}, {:plug_cowboy, "~> 2.6", [hex: :plug_cowboy, repo: "hexpm", optional: true]}, {:websock, "~> 0.4", [hex: :websock, repo: "hexpm", optional: false]}], "hexpm", "1d9812dc7e703c205049426fd4fe0852a247a825f91b099e53dc96f68bafe4c8"},
 }
