@@ -170,19 +170,29 @@ defmodule QuoteBookWeb.QuoteComponent do
   def attachment(assigns) do
     case assigns.attachment.type do
       :doc when assigns.attachment.ext == "mp4" ->
-        ~H"<video autoplay loop muted src={@attachment.path} type='video/mp4' />"
+        ~H"""
+        <video autoplay loop muted src={"/#{assigns.attachment.path}"} type='video/mp4' />
+        """
 
       type when type in ~w(photo doc graffiti)a ->
-        ~H"<img class='object-scale-down w-full h-full align-middle' src={@attachment.path} />"
+        ~H"""
+        <img class='object-scale-down w-full h-full align-middle' src={"/#{assigns.attachment.path}"} />
+        """
 
       :sticker ->
-        ~H"<img class='object-scale-down w-40 h-40 align-middle' src={@attachment.path} />"
+        ~H"""
+        <img class='object-scale-down w-40 h-40 align-middle' src={"/#{assigns.attachment.path}"} />
+        """
 
       :audio_message ->
-        ~H"<audio controls src={@attachment.path} type='audio/mpeg' />"
+        ~H"""
+        <audio controls src={"/#{assigns.attachment.path}"} type='audio/mpeg' />
+        """
 
       _ ->
-        ~H"<span><a href={@attachment.path}><%= @attachment.type %></a></span>"
+        ~H"""
+        <span><a href={"/#{assigns.attachment.path}"}><%= @attachment.type %></a></span>
+        """
     end
   end
 
