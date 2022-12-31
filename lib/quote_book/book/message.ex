@@ -55,14 +55,20 @@ defmodule QuoteBook.Book.Message do
     |> validate_required_inclusion([:text, :attachments, :reply_message, :fwd_messages])
   end
 
-  defp cast_nested_messages(message, 0) do
-    message
-  end
-
   defp cast_nested_messages(message, :infinity) do
     message
     |> cast_assoc(:reply_message, with: &__MODULE__.changeset_nested_message(&1, &2, :infinity))
     |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_nested_message(&1, &2, :infinity))
+  end
+
+  defp cast_nested_messages(message, 0) do
+    message
+    |> cast_assoc(:reply_message, with: &__MODULE__.changeset_nested_message(&1, &2, :stop))
+    |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_nested_message(&1, &2, :stop))
+  end
+
+  defp cast_nested_messages(message, :stop) do
+    message
   end
 
   defp cast_nested_messages(message, deep) do
