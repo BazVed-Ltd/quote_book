@@ -63,7 +63,7 @@ defmodule QuoteBook.Book do
   @raw_sql_message_tree """
   SELECT *
   FROM messages
-  WHERE peer_id = ? AND quote_id = ?
+  WHERE peer_id = ? AND quote_id = ? AND NOT deleted
   UNION ALL
   SELECT n.*
   FROM messages n

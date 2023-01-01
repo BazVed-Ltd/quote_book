@@ -51,10 +51,9 @@ defmodule QuoteBookWeb.Helpers.Loader do
        |> assign(quote: quote_message)
        |> append_nav_path({chat.title || "Чат", ~p"/#{chat.slug_or_id}"})}
     else
-      # FIXME: Исправить путь до цитаты
       _otherwise ->
         redirect_on_error(socket,
-          to: ~p"/#{socket.assigns.chat.id}",
+          to: ~p"/#{socket.assigns.chat.slug_or_id}",
           error: "Нет такой цитаты"
         )
     end
