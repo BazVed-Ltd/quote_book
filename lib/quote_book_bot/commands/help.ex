@@ -9,7 +9,7 @@ defmodule QuoteBookBot.Commands.Help do
   /удалить [номер цитаты] — удалить цитату
   /удалить п — удалить последнюю цитату
 
-  Powered by [id665045534|Grand Catware Server]
+  Powered by [club209871027|Grand Catware Server]
   """
 
   defcommand request,

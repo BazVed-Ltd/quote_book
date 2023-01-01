@@ -20,7 +20,8 @@
 
 console.log(`╔═══════════════════════════════╗
 ║Powered by Grand Catware Server║
-╚═══════════════════════════════╝`)
+╚═══════════════════════════════╝
+https://vk.com/club209871027`)
 
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
