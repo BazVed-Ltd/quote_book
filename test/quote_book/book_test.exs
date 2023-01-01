@@ -3,64 +3,6 @@ defmodule QuoteBook.BookTest do
 
   alias QuoteBook.Book
 
-  describe "messages" do
-    alias QuoteBook.Book.Message
-
-    import QuoteBook.BookFixtures
-
-    @invalid_attrs %{from_id: nil, peer_id: nil, text: nil}
-
-    test "list_messages/0 returns all messages" do
-      message = message_fixture()
-      assert Book.list_messages() == [message]
-    end
-
-    test "get_message!/1 returns the message with given id" do
-      message = message_fixture()
-      assert Book.get_message!(message.id) == message
-    end
-
-    test "create_message/1 with valid data creates a message" do
-      valid_attrs = %{from_id: 42, peer_id: 42, text: "some text"}
-
-      assert {:ok, %Message{} = message} = Book.create_message(valid_attrs)
-      assert message.from_id == 42
-      assert message.peer_id == 42
-      assert message.text == "some text"
-    end
-
-    test "create_message/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Book.create_message(@invalid_attrs)
-    end
-
-    test "update_message/2 with valid data updates the message" do
-      message = message_fixture()
-      update_attrs = %{from_id: 43, peer_id: 43, text: "some updated text"}
-
-      assert {:ok, %Message{} = message} = Book.update_message(message, update_attrs)
-      assert message.from_id == 43
-      assert message.peer_id == 43
-      assert message.text == "some updated text"
-    end
-
-    test "update_message/2 with invalid data returns error changeset" do
-      message = message_fixture()
-      assert {:error, %Ecto.Changeset{}} = Book.update_message(message, @invalid_attrs)
-      assert message == Book.get_message!(message.id)
-    end
-
-    test "delete_message/1 deletes the message" do
-      message = message_fixture()
-      assert {:ok, %Message{}} = Book.delete_message(message)
-      assert_raise Ecto.NoResultsError, fn -> Book.get_message!(message.id) end
-    end
-
-    test "change_message/1 returns a message changeset" do
-      message = message_fixture()
-      assert %Ecto.Changeset{} = Book.change_message(message)
-    end
-  end
-
   describe "attachments" do
     alias QuoteBook.Book.Attachment
 
@@ -122,7 +64,7 @@ defmodule QuoteBook.BookTest do
 
     import QuoteBook.BookFixtures
 
-    @invalid_attrs %{title: nil}
+    @invalid_attrs %{id: nil}
 
     test "list_chats/0 returns all chats" do
       chat = chat_fixture()
@@ -134,35 +76,18 @@ defmodule QuoteBook.BookTest do
       assert Book.get_chat!(chat.id) == chat
     end
 
-    test "create_chat/1 with valid data creates a chat" do
-      valid_attrs = %{title: "some title"}
-
-      assert {:ok, %Chat{} = chat} = Book.create_chat(valid_attrs)
-      assert chat.title == "some title"
-    end
-
-    test "create_chat/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Book.create_chat(@invalid_attrs)
-    end
-
     test "update_chat/2 with valid data updates the chat" do
       chat = chat_fixture()
       update_attrs = %{title: "some updated title"}
 
-      assert {:ok, %Chat{} = chat} = Book.update_chat(chat, update_attrs)
+      assert {:ok, %Chat{} = chat} = Book.create_or_update_chat(chat, update_attrs)
       assert chat.title == "some updated title"
     end
 
     test "update_chat/2 with invalid data returns error changeset" do
       chat = chat_fixture()
-      assert {:error, %Ecto.Changeset{}} = Book.update_chat(chat, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Book.create_or_update_chat(chat, @invalid_attrs)
       assert chat == Book.get_chat!(chat.id)
-    end
-
-    test "delete_chat/1 deletes the chat" do
-      chat = chat_fixture()
-      assert {:ok, %Chat{}} = Book.delete_chat(chat)
-      assert_raise Ecto.NoResultsError, fn -> Book.get_chat!(chat.id) end
     end
 
     test "change_chat/1 returns a chat changeset" do
