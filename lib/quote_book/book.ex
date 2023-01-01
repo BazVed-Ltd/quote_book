@@ -41,13 +41,7 @@ defmodule QuoteBook.Book do
   end
 
   def list_chats() do
-    query =
-      from c in Chat,
-        select_merge: %{
-          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
-        }
-
-    Repo.all(query)
+    Repo.all(Chat)
   end
 
   def get_last_quote_id(peer_id) do
@@ -518,33 +512,16 @@ defmodule QuoteBook.Book do
 
   """
   def get_chat!(id) do
-    query =
-      from c in Chat,
-        select_merge: %{
-          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
-        },
-        where: c.id == ^id
-
-    Repo.one!(query)
+    Repo.get!(Chat, id)
   end
 
   def get_chat(id) do
-    query =
-      from c in Chat,
-        select_merge: %{
-          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
-        },
-        where: c.id == ^id
-
-    Repo.one(query)
+    Repo.get(Chat, id)
   end
 
   def get_chat_by_slug(slug) do
     query =
       from c in Chat,
-        select_merge: %{
-          slug_or_id: fragment("COALESCE(c0.slug, CAST (c0.id as character varying(255)))")
-        },
         where: c.slug == ^slug
 
     Repo.one(query)

@@ -6,6 +6,7 @@ defmodule QuoteBookWeb.Helpers.Loader do
   use Phoenix.VerifiedRoutes, endpoint: QuoteBookWeb.Endpoint, router: QuoteBookWeb.Router
 
   alias QuoteBook.Book
+  alias QuoteBook.Book.Chat
 
   defp redirect_on_error(socket, opts) do
     to = Keyword.get(opts, :to, "/")
@@ -49,11 +50,11 @@ defmodule QuoteBookWeb.Helpers.Loader do
       {:cont,
        socket
        |> assign(quote: quote_message)
-       |> append_nav_path({chat.title || "Чат", ~p"/c/#{chat.slug_or_id}"})}
+       |> append_nav_path({chat.title || "Чат", ~p"/c/#{Chat.slug_or_id(chat)}"})}
     else
       _otherwise ->
         redirect_on_error(socket,
-          to: ~p"/c/#{socket.assigns.chat.slug_or_id}",
+          to: ~p"/c/#{Chat.slug_or_id(chat)}",
           error: "Нет такой цитаты"
         )
     end

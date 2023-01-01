@@ -10,8 +10,6 @@ defmodule QuoteBook.Book.Chat do
 
     field :slug, TitleSlug.Type
 
-    field :slug_or_id, :string, virtual: true
-
     timestamps()
   end
 
@@ -25,13 +23,9 @@ defmodule QuoteBook.Book.Chat do
     |> validate_format(:title, ~r/\p{L}/u, message: "Название должно содержать хотя бы одну букву")
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint(message: "Чат с таким названием уже существует. Попробуйте другое")
-    |> cast_slug_or_id()
   end
 
-  def cast_slug_or_id(chat) do
-    id = get_change(chat, :id) || get_field(chat, :id)
-    slug = get_change(chat, :slug) || get_field(chat, :slug)
-
-    put_change(chat, :slug_or_id, slug || id)
+  def slug_or_id(chat) do
+    chat.slug || chat.id
   end
 end

@@ -1,4 +1,6 @@
 defmodule QuoteBookBot.Utils.Links do
+  alias QuoteBook.Book.Chat
+
   defp host do
     Application.get_env(:quote_book, :host, "localhost")
   end
@@ -7,7 +9,7 @@ defmodule QuoteBookBot.Utils.Links do
     path = QuoteBookWeb.Router.Helpers.live_path(
       QuoteBookWeb.Endpoint,
       QuoteBookWeb.ChatLive,
-      chat.slug_or_id
+      Chat.slug_or_id(chat)
     )
 
     host() <> path
@@ -17,7 +19,7 @@ defmodule QuoteBookBot.Utils.Links do
     path = QuoteBookWeb.Router.Helpers.live_path(
       QuoteBookWeb.Endpoint,
       QuoteBookWeb.QuoteLive,
-      chat.slug_or_id,
+      Chat.slug_or_id(chat),
       message_quote.quote_id
     )
 
