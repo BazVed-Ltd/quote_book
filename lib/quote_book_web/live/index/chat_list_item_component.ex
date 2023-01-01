@@ -4,7 +4,7 @@ defmodule QuoteBookWeb.ChatListItemComponent do
   def chat(assigns) do
     ~H"""
     <li>
-      <.link href={~p"/#{@chat.slug_or_id}"}><%= @chat.title || @chat.id %></.link>
+      <.link href={~p"/c/#{@chat.slug_or_id}"}><%= @chat.title || @chat.id %></.link>
     </li>
     """
   end

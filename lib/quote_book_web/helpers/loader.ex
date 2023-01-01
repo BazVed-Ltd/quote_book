@@ -49,11 +49,11 @@ defmodule QuoteBookWeb.Helpers.Loader do
       {:cont,
        socket
        |> assign(quote: quote_message)
-       |> append_nav_path({chat.title || "Чат", ~p"/#{chat.slug_or_id}"})}
+       |> append_nav_path({chat.title || "Чат", ~p"/c/#{chat.slug_or_id}"})}
     else
       _otherwise ->
         redirect_on_error(socket,
-          to: ~p"/#{socket.assigns.chat.slug_or_id}",
+          to: ~p"/c/#{socket.assigns.chat.slug_or_id}",
           error: "Нет такой цитаты"
         )
     end

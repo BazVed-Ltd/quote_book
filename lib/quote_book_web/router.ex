@@ -18,8 +18,8 @@ defmodule QuoteBookWeb.Router do
     pipe_through :browser
 
     live "/", IndexLive
-    live "/:peer_id", ChatLive
-    live "/:peer_id/:quote_id", QuoteLive
+    live "/c/:peer_id", ChatLive
+    live "/c/:peer_id/:quote_id", QuoteLive
   end
 
   # Other scopes may use custom stacks.
