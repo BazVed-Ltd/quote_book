@@ -16,8 +16,7 @@ a {
 }
 
 a:hover {
-  @apply underline;
-  @apply decoration-solid;
+  @apply underline decoration-solid;
 }
 
 .pl-nested {
@@ -30,6 +29,10 @@ a:hover {
 
 .flex-50 {
   flex: calc(100% / 3);
+}
+
+.nav-border {
+  @apply border border-t-0 border-zinc-600 rounded-xl rounded-tl-none rounded-tr-none;
 }
 
 /* Alerts and form errors used by phx.new */
