@@ -1,6 +1,6 @@
 defmodule QuoteBookBot.Commands.Help do
   @moduledoc """
-  /помощь [команда] — выводит краткое описание всех команд или подробное
+  /помощь [команда] — выводит краткое описание всех команд или подробное \
   описание одной команды.
   """
   import VkBot.{CommandsManager, Request}
