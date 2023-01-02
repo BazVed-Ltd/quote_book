@@ -1,6 +1,9 @@
 defmodule QuoteBookBot.Utils.MapExtensions do
+  @moduledoc false
+
+  @spec update_or_nothing(map, any, any) :: map
   @doc """
-  Literally `Map.update/4`, but without adding default value.
+  Буквально `Map.update/4`, но без добавления стандартного значения.
   """
   def update_or_nothing(map, key, fun) do
     case Map.fetch(map, key) do

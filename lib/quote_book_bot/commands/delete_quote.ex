@@ -1,4 +1,11 @@
 defmodule QuoteBookBot.Commands.DeleteQuote do
+  @moduledoc """
+  /удалить <id|п> — удаляет цитату.
+
+  Удалять можно только свои цитаты. Админ может удалить любую цитату.
+  Поддерживаются отрицательные индексы.
+  Если вместо id указать «п», то удалится последняя цитата.
+  """
   import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 
@@ -24,17 +31,20 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
 
       [_command, "п"] ->
         if is_admin do
-          Book.maybe_delete_last_quote_by_admin(peer_id)
+          Book.maybe_delete_quote_by_admin(peer_id, -1)
         else
-          Book.maybe_delete_last_quote(peer_id, from_id)
+          Book.maybe_delete_quote(peer_id, -1, from_id)
         end
 
       [_command, quote_id] ->
+        quote_id = String.to_integer(quote_id)
         if is_admin do
           Book.maybe_delete_quote_by_admin(peer_id, quote_id)
         else
           Book.maybe_delete_quote(peer_id, quote_id, from_id)
         end
+      [_command | _rest] ->
+        :help
     end
     |> case do
       :help ->

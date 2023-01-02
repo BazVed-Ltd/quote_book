@@ -1,8 +1,15 @@
 defmodule QuoteBookBot.Utils.Attachments do
+  @moduledoc """
+  Модуль содержит функции для загрузки вложений из сообщений.
+  """
   alias QuoteBookBot.Utils.{MapExtensions, BitstringExtensions}
 
   @attachments_dir Application.compile_env!(:quote_book, :attachments_directory)
 
+  @spec insert_attachments(nil | map) :: nil | map
+  @doc """
+  Возвращает сообщение, в котором все вложение загружены.
+  """
   def insert_attachments(nil), do: nil
 
   def insert_attachments(message) do
@@ -14,11 +21,19 @@ defmodule QuoteBookBot.Utils.Attachments do
     end)
   end
 
+  @spec load_attachments([map()]) :: [map()]
+  @doc """
+  См. `load_attachment/1`.
+  """
   def load_attachments(attachments) do
     attachments
     |> Enum.map(&load_attachment/1)
   end
 
+  @spec load_attachment(map) :: map()
+  @doc """
+  Возвращает загруженное вложение.
+  """
   def load_attachment(attachment) do
     attachment
     |> VkBot.Attachment.new(gif_as_mp4: true)

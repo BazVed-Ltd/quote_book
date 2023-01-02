@@ -1,7 +1,7 @@
 defmodule QuoteBookWeb.IndexLive do
   use QuoteBookWeb, :live_view
 
-  alias QuoteBookWeb.{ChatLive, ChatListItemComponent}
+  alias QuoteBookWeb.ChatListItemComponent
   alias QuoteBook.Book
 
   @impl true

@@ -20,6 +20,9 @@ config :quote_book, QuoteBookWeb.Endpoint,
   secret_key_base: "D7gfp0f5T/YwmVCgOnBMLlzs0emxX0tm6WpHwzmmyIvIrNdFoPuPvTBhHqmQWgqa",
   server: false
 
+config :vk_bot,
+  in_test: true
+
 # In test we don't send emails.
 config :quote_book, QuoteBook.Mailer, adapter: Swoosh.Adapters.Test
 

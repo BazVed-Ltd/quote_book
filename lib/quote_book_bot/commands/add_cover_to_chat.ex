@@ -1,4 +1,9 @@
 defmodule QuoteBookBot.Commands.AddCoverToChat do
+  @moduledoc """
+  /обложка — устанавливает обложку чата. Нужно прикрепить гифку или фото.
+
+  Доступно только администратору.
+  """
   import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 

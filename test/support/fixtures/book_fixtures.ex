@@ -15,24 +15,9 @@ defmodule QuoteBook.BookFixtures do
         peer_id: 42,
         text: "some text"
       })
-      |> QuoteBook.Book.create_message()
+      |> QuoteBook.Book.create_quote_from_message()
 
     message
-  end
-
-  @doc """
-  Generate a attachment.
-  """
-  def attachment_fixture(attrs \\ %{}) do
-    {:ok, attachment} =
-      attrs
-      |> Enum.into(%{
-        path: "some path",
-        type: :photo
-      })
-      |> QuoteBook.Book.create_attachment()
-
-    attachment
   end
 
   @doc """
@@ -40,11 +25,14 @@ defmodule QuoteBook.BookFixtures do
   """
   def chat_fixture(attrs \\ %{}) do
     {:ok, chat} =
-      attrs
-      |> Enum.into(%{
-        title: "some title"
-      })
-      |> QuoteBook.Book.create_chat()
+      QuoteBook.Book.get_or_new_chat(1)
+      |> QuoteBook.Book.create_or_update_chat(
+        attrs
+        |> Enum.into(%{
+          id: 1,
+          title: "some title"
+        })
+      )
 
     chat
   end

@@ -1,4 +1,10 @@
 defmodule QuoteBookBot.Utils.BitstringExtensions do
+  @moduledoc false
+
+  @spec chunks(bitstring, pos_integer()) :: [bitstring()]
+  @doc """
+  См. `Enum.chunk_every/2`.
+  """
   def chunks(binary, n) do
     do_chunks(binary, n, [])
   end
