@@ -1,6 +1,6 @@
 defmodule QuoteBookBot.Commands.SaveChatName do
   @moduledoc """
-  /чат — задаёт название чату.
+  /чат <название чата> — задаёт название чату.
 
   Доступно только администратору.
   """

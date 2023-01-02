@@ -184,7 +184,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     ~H"""
     <ul class="flex flex-wrap gap-1">
       <%= for attachment <- @attachments do %>
-        <li class="flex-50">
+        <li class="flex-images-grid">
           <.attachment attachment={attachment} />
         </li>
       <% end %>
@@ -201,7 +201,7 @@ defmodule QuoteBookWeb.QuoteComponent do
 
       type when type in ~w(photo doc graffiti)a ->
         ~H"""
-        <img class="object-scale-down w-full h-full align-middle" src={"/#{assigns.attachment.path}"} />
+        <img class="max-w-full max-h-full align-middle" src={"/#{assigns.attachment.path}"} />
         """
 
       :sticker ->
