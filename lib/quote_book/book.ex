@@ -133,14 +133,7 @@ defmodule QuoteBook.Book do
     |> Repo.insert()
   end
 
-  ####################
-  # Refactor.this do #
-  ####################
-
-  @typep sql_id :: non_neg_integer() | String.t()
-
-  @spec maybe_delete_quote(sql_id(), sql_id(), sql_id()) ::
-          :deleted | :nothing
+  @spec maybe_delete_quote(non_neg_integer(), integer(), non_neg_integer()) :: :deleted | :nothing
   @doc """
   Условно удаляет цитату. Тоже, что и `maybe_delete_quote_by_admin/2`, но
   возвращает `:nothing`, если цитата не принадлежит пользователю.
@@ -149,13 +142,19 @@ defmodule QuoteBook.Book do
     query =
       from m in Message,
         where:
-          m.peer_id == ^peer_id and m.quote_id == ^quote_id and m.from_id == ^from_id and
-            not m.deleted
+          m.peer_id == ^peer_id and m.from_id == ^from_id and not m.deleted and
+            m.quote_id ==
+              fragment(
+                "(CASE WHEN ? > 0 THEN ? ELSE (SELECT max(quote_id) FROM messages) + ? + 1 END)",
+                ^quote_id,
+                ^quote_id,
+                ^quote_id
+              )
 
     maybe_delete_or_update_by_query(query)
   end
 
-  @spec maybe_delete_quote_by_admin(sql_id(), sql_id()) :: :deleted | :nothing
+  @spec maybe_delete_quote_by_admin(non_neg_integer(), integer()) :: :deleted | :nothing
   @doc """
   Условно удаляет цитату. Должно выполняться __только__ для администраторов чата.
 
@@ -168,7 +167,15 @@ defmodule QuoteBook.Book do
   def maybe_delete_quote_by_admin(peer_id, quote_id) do
     query =
       from m in Message,
-        where: m.peer_id == ^peer_id and m.quote_id == ^quote_id and not m.deleted
+        where:
+          m.peer_id == ^peer_id and not m.deleted and
+            m.quote_id ==
+              fragment(
+                "(CASE WHEN ? > 0 THEN ? ELSE (SELECT max(quote_id) FROM messages) + ? + 1 END)",
+                ^quote_id,
+                ^quote_id,
+                ^quote_id
+              )
 
     maybe_delete_or_update_by_query(query)
   end
@@ -196,65 +203,6 @@ defmodule QuoteBook.Book do
     end
 
     :deleted
-  end
-
-  @spec maybe_delete_last_quote(sql_id(), sql_id()) :: :deleted | :nothing
-  @doc """
-  То же, что и `maybe_delete_quote/3`, но удаляет последнюю цитату
-  """
-  def maybe_delete_last_quote(peer_id, from_id) do
-    last_quote_id = get_last_quote_id(peer_id)
-
-    query =
-      from m in Message,
-        where:
-          m.peer_id == ^peer_id and m.quote_id == ^last_quote_id and m.from_id == ^from_id and
-            not m.deleted
-
-    maybe_delete_last_by_query(query)
-  end
-
-  @spec maybe_delete_last_quote_by_admin(sql_id()) :: :deleted | :nothing
-  @doc """
-  То же, что и `maybe_delete_quote_by_admin/2`, но удаляет последнюю цитату.
-  """
-  def maybe_delete_last_quote_by_admin(peer_id) do
-    last_quote_id = get_last_quote_id(peer_id)
-
-    query =
-      from m in Message,
-        where: m.peer_id == ^peer_id and m.quote_id == ^last_quote_id and not m.deleted
-
-    maybe_delete_last_by_query(query)
-  end
-
-  defp maybe_delete_last_by_query(query) do
-    query
-    |> Repo.one()
-    |> maybe_delete_last()
-  end
-
-  defp maybe_delete_last(nil), do: :nothing
-
-  defp maybe_delete_last(quote_message) do
-    Repo.delete!(quote_message)
-    :deleted
-  end
-
-  #######
-  # end #
-  #######
-
-  @spec get_users_from_messages :: [User.t()]
-  def get_users_from_messages do
-    query =
-      from q in Message,
-        left_join: u in User,
-        on: q.from_id == u.id,
-        select: {q.from_id, u},
-        distinct: q.from_id
-
-    Repo.all(query)
   end
 
   @spec insert_users(any()) :: {:ok, %{String.t() => User.t()}}
