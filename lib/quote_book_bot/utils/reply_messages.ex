@@ -1,4 +1,12 @@
 defmodule QuoteBookBot.Utils.ReplyMessages do
+  @moduledoc """
+  API ВКонтакте в поле `reply_message` возвращает огрызок сообщения.
+  `insert_reply_message/1` восстанавливает дерево пересланных сообщений полностью.
+  """
+  @spec insert_reply_message(map()) :: map()
+  @doc """
+  Возвращает сообщение с восстановленным деревом пересланных сообщений.
+  """
   def insert_reply_message(%{"reply_message" => reply_message} = message) do
     conversation_message_id = reply_message["conversation_message_id"]
     peer_id = message["peer_id"]

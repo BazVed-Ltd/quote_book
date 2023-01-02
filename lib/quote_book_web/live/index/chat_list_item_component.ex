@@ -1,4 +1,5 @@
 defmodule QuoteBookWeb.ChatListItemComponent do
+  @moduledoc false
   use QuoteBookWeb, :component
 
   alias QuoteBook.Book.Chat

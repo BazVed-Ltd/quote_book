@@ -1,4 +1,9 @@
 defmodule QuoteBookBot.Commands.SaveChatName do
+  @moduledoc """
+  /чат — задаёт название чату.
+
+  Доступно только администратору.
+  """
   import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 

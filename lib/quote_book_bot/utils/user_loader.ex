@@ -1,7 +1,18 @@
 defmodule QuoteBookBot.Utils.UserLoader do
+  @moduledoc """
+  Загрузка пользователей.
+  """
   alias QuoteBook.Book
 
   # TODO: Лучше скачивать аватарки
+  @spec insert_new_users_data_to_db([non_neg_integer()]) :: {:ok, map()}
+  @doc """
+  Возвращает `{:ok, _inserted_users}`, если все пользователи добавлены успешно.
+
+  Поднимает исключение, если не получилось добавить хотя бы одного пользователя.
+
+  Чтобы не было коллизий с сообществами, у них `id` увеличен на `2_000_000_000`.
+  """
   def insert_new_users_data_to_db(user_ids) do
     {group_ids, user_ids} = Enum.split_with(user_ids, &(&1 > 2_000_000_000))
 

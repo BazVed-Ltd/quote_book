@@ -1,4 +1,7 @@
 defmodule QuoteBookWeb.Helpers.Loader do
+  @moduledoc """
+  Загрузка полей.
+  """
   import Phoenix.LiveView
 
   import Phoenix.Component
@@ -22,6 +25,14 @@ defmodule QuoteBookWeb.Helpers.Loader do
     assign(socket, nav_paths: [path | Map.get(socket.assigns, :nav_paths, [])])
   end
 
+  @doc """
+  Добавляет поле в `assigns`, если объект с таким названием есть в БД,
+  иначе перенаправляет на верхний уровень.
+
+  ## Доступные поля:
+    - `:chat` — загружает чат.
+    - `:quote` — загружает цитату, требует, чтобы перед этим был загружен чат.
+  """
   def on_mount(:chat, params, _session, socket) do
     chat =
       params

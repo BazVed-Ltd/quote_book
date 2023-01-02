@@ -1,4 +1,5 @@
 defmodule QuoteBookWeb.QuoteComponent do
+  @moduledoc false
   use QuoteBookWeb, :component
 
   alias Phoenix.HTML

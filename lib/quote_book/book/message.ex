@@ -1,6 +1,56 @@
 defmodule QuoteBook.Book.Message do
+  @moduledoc """
+  Сообщение в чате.
+
+  Сообщения имеют древовидную структуру. Родительским сообщением является
+  команда о сохранении цитаты. Сообщение без вложенности не может быть
+  цитатой.
+
+  Вложенность можно ограничить передав в `changeset/3` уровень вложенности.
+
+  ## Примеры
+
+  ```
+  - Привет
+
+  - > Привет
+  - Ага, тебе того же
+  ```
+
+  Если сохранить последнее сообщение с вложенностью 0, то мы получим цитату:
+  ```
+  - Ага, тебе того же
+  ```
+
+  Если сохранить это же сообщение с вложенностью 1 или больше, то мы сохраним
+  дерево сообщений полностью:
+  ```
+  - Привет
+
+  - > Привет
+  - Ага, тебе того же
+  ```
+  """
   use Ecto.Schema
   import Ecto.Changeset
+
+  @type not_loaded :: Ecto.Association.NotLoaded.t()
+
+  @type t :: %__MODULE__{
+    id: non_neg_integer() | nil,
+    quote_id: non_neg_integer() | nil,
+    peer_id: non_neg_integer() | nil,
+    text: String.t() | nil,
+    date: non_neg_integer() | nil,
+    reply_message_id: non_neg_integer() | nil,
+    fwd_from_message_id: non_neg_integer() | nil,
+    deleted: boolean(),
+
+    from: QuoteBook.Book.User.t() | not_loaded(),
+    reply_message: t | not_loaded(),
+    fwd_messages: [t()] | not_loaded(),
+    attachments: [QuoteBook.Book.Attachment.t()] | not_loaded(),
+  }
 
   schema "messages" do
     field :quote_id, :id
@@ -24,7 +74,7 @@ defmodule QuoteBook.Book.Message do
     timestamps()
   end
 
-  @doc false
+  @spec changeset(t(), map(), :infinity | non_neg_integer()) :: Ecto.Changeset.t()
   def changeset(message, attrs, deep \\ :infinity) do
     message
     |> changeset_nested_message(attrs, deep)
@@ -36,15 +86,18 @@ defmodule QuoteBook.Book.Message do
     |> cast_quote_id()
   end
 
+  @spec cast_quote_id(Ecto.Changeset.t()) :: Ecto.Changeset.t()
   def cast_quote_id(message) do
     peer_id = get_field(message, :peer_id)
 
+    # FIXME: поднять получение айдишника из этого модуля наверх
     quote_id = (QuoteBook.Book.get_last_quote_id(peer_id) || 0) + 1
 
     message
     |> put_change(:quote_id, quote_id)
   end
 
+  @spec changeset_nested_message(t(), map(), :infinity | :stop | non_neg_integer()) :: map
   def changeset_nested_message(message, attrs, deep) do
     message
     |> cast(attrs, [:text, :from_id, :date])
@@ -77,6 +130,9 @@ defmodule QuoteBook.Book.Message do
     |> cast_assoc(:fwd_messages, with: &__MODULE__.changeset_nested_message(&1, &2, deep - 1))
   end
 
+  # doc
+  #   Требует, чтобы хотя бы одно поле в `fields` было предосталвено
+  #
   defp validate_required_inclusion(changeset, fields, opts \\ []) do
     error_message =
       Keyword.get(

@@ -1,4 +1,10 @@
 defmodule QuoteBookBot.Commands.DeleteQuote do
+  @moduledoc """
+  /удалить <id|п> — удаляет цитату.
+
+  Удалять можно только свои цитаты. Админ может удалить любую цитату.
+  Если вместо id указать «п», то удалится последняя цитата.
+  """
   import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 

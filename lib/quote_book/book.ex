@@ -1,13 +1,13 @@
 defmodule QuoteBook.Book do
   @moduledoc """
-  The Book context.
+  Цитаты и всё, что с ними связано.
   """
 
   import Ecto.Query, warn: false
   alias Ecto.Multi
   alias QuoteBook.Repo
 
-  alias QuoteBook.Book.{Message, User, Chat}
+  alias QuoteBook.Book.{Message, User, Chat, Attachment}
 
   @raw_sql_all_messages """
   SELECT *
@@ -19,14 +19,9 @@ defmodule QuoteBook.Book do
   INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id OR fwd.id = n.reply_message_id
   """
 
+  @spec list_quotes(non_neg_integer()) :: [Message.t()]
   @doc """
-  Returns the list of messages.
-
-  ## Examples
-
-      iex> list_messages()
-      [%Message{}, ...]
-
+  Возвращает список цитат в чате.
   """
   def list_quotes(peer_id) do
     query =
@@ -40,10 +35,19 @@ defmodule QuoteBook.Book do
     |> Enum.reverse()
   end
 
+  @spec list_chats :: [Chat.t()]
+  @doc """
+  Возвращет список чатов.
+  """
   def list_chats() do
     Repo.all(Chat)
   end
 
+  @spec get_last_quote_id(non_neg_integer()) :: non_neg_integer() | nil
+  @doc """
+  Возвращает id последней цитаты в чате.
+  Если в чате ещё нету цитат, то вернёт `nil`.
+  """
   def get_last_quote_id(peer_id) do
     query =
       from(m in Message,
@@ -64,19 +68,9 @@ defmodule QuoteBook.Book do
   INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id OR fwd.id = n.reply_message_id
   """
 
+  @spec get_quote(non_neg_integer(), non_neg_integer()) :: Message.t()
   @doc """
-  Gets a single message.
-
-  Raises `Ecto.NoResultsError` if the Message does not exist.
-
-  ## Examples
-
-      iex> get_message!(123)
-      %Message{}
-
-      iex> get_message!(456)
-      ** (Ecto.NoResultsError)
-
+  Возвращает конкретную цитату из чата.
   """
   def get_quote(peer_id, quote_id) do
     query =
@@ -90,6 +84,10 @@ defmodule QuoteBook.Book do
     |> List.first()
   end
 
+  @spec remake_tree([Message.t()]) :: [Message.t()]
+  # doc
+  #   Из списка сообщений восстанавливает дерево.
+  #
   defp remake_tree(messages) do
     fwd_messages = Enum.group_by(messages, fn message -> message.fwd_from_message_id end)
     reply_messages = Enum.group_by(messages, fn message -> message.reply_message_id end)
@@ -124,17 +122,10 @@ defmodule QuoteBook.Book do
     end
   end
 
+  @spec create_quote_from_message(map(), non_neg_integer()) ::
+          {:ok, Message.t()} | {:error, Ecto.Changeset.t()}
   @doc """
-  Creates a message.
-
-  ## Examples
-
-      iex> create_message(%{field: value})
-      {:ok, %Message{}}
-
-      iex> create_message(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
+  Создаёт цитату из сообщения.
   """
   def create_quote_from_message(attrs \\ %{}, deep) do
     %Message{}
@@ -142,35 +133,17 @@ defmodule QuoteBook.Book do
     |> Repo.insert()
   end
 
+  ####################
+  # Refactor.this do #
+  ####################
+
+  @typep sql_id :: non_neg_integer() | String.t()
+
+  @spec maybe_delete_quote(sql_id(), sql_id(), sql_id()) ::
+          :deleted | :nothing
   @doc """
-  Updates a message.
-
-  ## Examples
-
-      iex> update_message(message, %{field: new_value})
-      {:ok, %Message{}}
-
-      iex> update_message(message, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_message(%Message{} = message, attrs) do
-    message
-    |> Message.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a message.
-
-  ## Examples
-
-      iex> delete_message(message)
-      {:ok, %Message{}}
-
-      iex> delete_message(message)
-      {:error, %Ecto.Changeset{}}
-
+  Условно удаляет цитату. Тоже, что и `maybe_delete_quote_by_admin/2`, но
+  возвращает `:nothing`, если цитата не принадлежит пользователю.
   """
   def maybe_delete_quote(peer_id, quote_id, from_id) do
     query =
@@ -182,6 +155,16 @@ defmodule QuoteBook.Book do
     maybe_delete_or_update_by_query(query)
   end
 
+  @spec maybe_delete_quote_by_admin(sql_id(), sql_id()) :: :deleted | :nothing
+  @doc """
+  Условно удаляет цитату. Должно выполняться __только__ для администраторов чата.
+
+  Полностью удаляет цитату в чате, если она является последней созданной
+  в этом чате; если цитата  не является последней, то устанавливается флаг
+  `deleted = true`. В обоих случаях вернётся `:deleted`.
+
+  Если такой цитаты или чата не существует, то возвращается `:nothing`.
+  """
   def maybe_delete_quote_by_admin(peer_id, quote_id) do
     query =
       from m in Message,
@@ -215,6 +198,10 @@ defmodule QuoteBook.Book do
     :deleted
   end
 
+  @spec maybe_delete_last_quote(sql_id(), sql_id()) :: :deleted | :nothing
+  @doc """
+  То же, что и `maybe_delete_quote/3`, но удаляет последнюю цитату
+  """
   def maybe_delete_last_quote(peer_id, from_id) do
     last_quote_id = get_last_quote_id(peer_id)
 
@@ -227,6 +214,10 @@ defmodule QuoteBook.Book do
     maybe_delete_last_by_query(query)
   end
 
+  @spec maybe_delete_last_quote_by_admin(sql_id()) :: :deleted | :nothing
+  @doc """
+  То же, что и `maybe_delete_quote_by_admin/2`, но удаляет последнюю цитату.
+  """
   def maybe_delete_last_quote_by_admin(peer_id) do
     last_quote_id = get_last_quote_id(peer_id)
 
@@ -250,115 +241,11 @@ defmodule QuoteBook.Book do
     :deleted
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking message changes.
+  #######
+  # end #
+  #######
 
-  ## Examples
-
-      iex> change_message(message)
-      %Ecto.Changeset{data: %Message{}}
-
-  """
-  def change_message(%Message{} = message, attrs \\ %{}) do
-    Message.changeset(message, attrs)
-  end
-
-  alias QuoteBook.Book.Attachment
-
-  @doc """
-  Returns the list of attachments.
-
-  ## Examples
-
-      iex> list_attachments()
-      [%Attachment{}, ...]
-
-  """
-  def list_attachments do
-    Repo.all(Attachment)
-  end
-
-  @doc """
-  Gets a single attachment.
-
-  Raises `Ecto.NoResultsError` if the Attachment does not exist.
-
-  ## Examples
-
-      iex> get_attachment!(123)
-      %Attachment{}
-
-      iex> get_attachment!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_attachment!(id), do: Repo.get!(Attachment, id)
-
-  @doc """
-  Creates a attachment.
-
-  ## Examples
-
-      iex> create_attachment(%{field: value})
-      {:ok, %Attachment{}}
-
-      iex> create_attachment(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_attachment(attrs \\ %{}) do
-    %Attachment{}
-    |> Attachment.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a attachment.
-
-  ## Examples
-
-      iex> update_attachment(attachment, %{field: new_value})
-      {:ok, %Attachment{}}
-
-      iex> update_attachment(attachment, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_attachment(%Attachment{} = attachment, attrs) do
-    attachment
-    |> Attachment.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a attachment.
-
-  ## Examples
-
-      iex> delete_attachment(attachment)
-      {:ok, %Attachment{}}
-
-      iex> delete_attachment(attachment)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_attachment(%Attachment{} = attachment) do
-    Repo.delete(attachment)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking attachment changes.
-
-  ## Examples
-
-      iex> change_attachment(attachment)
-      %Ecto.Changeset{data: %Attachment{}}
-
-  """
-  def change_attachment(%Attachment{} = attachment, attrs \\ %{}) do
-    Attachment.changeset(attachment, attrs)
-  end
-
+  @spec get_users_from_messages :: [User.t()]
   def get_users_from_messages do
     query =
       from q in Message,
@@ -370,6 +257,10 @@ defmodule QuoteBook.Book do
     Repo.all(query)
   end
 
+  @spec insert_users(any()) :: {:ok, %{String.t() => User.t()}}
+  @doc """
+  Добавляет пользователей в БД одной транзакцией.
+  """
   def insert_users(users) do
     users
     |> Stream.map(&User.changeset(%User{}, &1))
@@ -381,7 +272,7 @@ defmodule QuoteBook.Book do
   end
 
   @doc """
-  Returns the list of users.
+  Возвращает список всех пользователей.
 
   ## Examples
 
@@ -393,7 +284,13 @@ defmodule QuoteBook.Book do
     Repo.all(User)
   end
 
+  @spec reject_exists_user([non_neg_integer()]) :: [non_neg_integer()]
+  @doc """
+  Отбрасывает `id` тех пользователей, что уже добавлены в БД.
+  """
   def reject_exists_user(user_ids) do
+    # TODO: проверить, будет ли оно работать с сообществами.
+    #      Ощущение, что тут может быть баг.
     query =
       from u in User,
         where: u.id in ^user_ids,
@@ -406,11 +303,11 @@ defmodule QuoteBook.Book do
   end
 
   @doc """
-  Gets a single user.
+  Возвращает одного пользователя.
 
-  Raises `Ecto.NoResultsError` if the User does not exist.
+  Поднимает `Ecto.NoResultsError` если пользователя не сущетсвует.
 
-  ## Examples
+  ## Примеры
 
       iex> get_user!(123)
       %User{}
@@ -422,9 +319,9 @@ defmodule QuoteBook.Book do
   def get_user!(id), do: Repo.get!(User, id)
 
   @doc """
-  Creates a user.
+  Создаёт пользователя.
 
-  ## Examples
+  ## Примеры
 
       iex> create_user(%{field: value})
       {:ok, %User{}}
@@ -439,10 +336,11 @@ defmodule QuoteBook.Book do
     |> Repo.insert()
   end
 
+  @spec update_user(User.t(), map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   @doc """
-  Updates a user.
+  Обновляет пользователя.
 
-  ## Examples
+  ## Примеры
 
       iex> update_user(user, %{field: new_value})
       {:ok, %User{}}
@@ -457,6 +355,7 @@ defmodule QuoteBook.Book do
     |> Repo.update()
   end
 
+  @spec update_users([Ecto.Changeset.t()]) :: {:ok, %{String.t() => User.t()}}
   def update_users([]), do: {:ok, %{}}
 
   def update_users(users_changesets) do
@@ -469,25 +368,9 @@ defmodule QuoteBook.Book do
   end
 
   @doc """
-  Deletes a user.
+  Возвращает `%Ecto.Changeset{}` для отслеживания изменений пользователя.
 
-  ## Examples
-
-      iex> delete_user(user)
-      {:ok, %User{}}
-
-      iex> delete_user(user)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_user(%User{} = user) do
-    Repo.delete(user)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking user changes.
-
-  ## Examples
+  ## Примеры
 
       iex> change_user(user)
       %Ecto.Changeset{data: %User{}}
@@ -497,28 +380,31 @@ defmodule QuoteBook.Book do
     User.changeset(user, attrs)
   end
 
+  @spec get_chat(non_neg_integer()) :: Chat.t() | nil
   @doc """
-  Gets a single chat.
+  Возвращает чат по `id`.
 
-  Raises `Ecto.NoResultsError` if the Chat does not exist.
+  Возвращает nil если чата не существует.
 
-  ## Examples
+  ## Примеры
 
       iex> get_chat!(123)
       %Chat{}
 
       iex> get_chat!(456)
-      ** (Ecto.NoResultsError)
+      nil
 
   """
-  def get_chat!(id) do
-    Repo.get!(Chat, id)
-  end
-
   def get_chat(id) do
     Repo.get(Chat, id)
   end
 
+  @spec get_chat_by_slug(String.t()) :: Chat.t() | nil
+  @doc """
+  Возвращает чат по `slug`.
+
+  Возвращает nil если чата не существует.
+  """
   def get_chat_by_slug(slug) do
     query =
       from c in Chat,
@@ -527,6 +413,14 @@ defmodule QuoteBook.Book do
     Repo.one(query)
   end
 
+  @spec get_chat_by_slug_or_id(String.t()) :: QuoteBook.Book.Chat.t() | nil
+  @doc """
+  Возвращает чат по `id`, если аргумент парсится как число, иначе по `slug`.
+
+  Возвращает nil если чата не существует.
+
+  См. `get_chat_by_slug/1` и `get_chat/1`
+  """
   def get_chat_by_slug_or_id(text) do
     case Integer.parse(text) do
       {peer_id, ""} -> get_chat(peer_id)
@@ -534,6 +428,10 @@ defmodule QuoteBook.Book do
     end
   end
 
+  @spec get_or_new_chat(non_neg_integer()) :: Chat.t()
+  @doc """
+  Возвращает чат из БД, если существует, иначе возвращает новый.
+  """
   def get_or_new_chat(id) do
     case get_chat(id) do
       nil -> %Chat{id: id}
@@ -541,34 +439,18 @@ defmodule QuoteBook.Book do
     end
   end
 
-  @doc """
-  Creates a chat.
-
-  ## Examples
-
-      iex> create_chat(%{field: value})
-      {:ok, %Chat{}}
-
-      iex> create_chat(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_chat!(attrs \\ %{}) do
-    %Chat{}
-    |> Chat.changeset(attrs)
-    |> Repo.insert!()
-  end
-
+  @spec create_or_update_chat(Chat.t(), map()) :: {:ok, Chat.t()} | {:error, Ecto.Changeset.t()}
   def create_or_update_chat(chat, attrs \\ %{}) do
     chat
     |> Chat.changeset(attrs)
     |> Repo.insert_or_update()
   end
 
+  @spec update_chat(Chat.t(), map()) :: {:ok, Chat.t()} | {:error, Ecto.Changeset.t()}
   @doc """
-  Updates a chat.
+  Обновляет чат.
 
-  ## Examples
+  ## Примеры
 
       iex> update_chat(chat, %{field: new_value})
       {:ok, %Chat{}}
@@ -583,35 +465,8 @@ defmodule QuoteBook.Book do
     |> Repo.update()
   end
 
-  @doc """
-  Deletes a chat.
-
-  ## Examples
-
-      iex> delete_chat(chat)
-      {:ok, %Chat{}}
-
-      iex> delete_chat(chat)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_chat(%Chat{} = chat) do
-    Repo.delete(chat)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking chat changes.
-
-  ## Examples
-
-      iex> change_chat(chat)
-      %Ecto.Changeset{data: %Chat{}}
-
-  """
-  def change_chat(%Chat{} = chat, attrs \\ %{}) do
-    Chat.changeset(chat, attrs)
-  end
-
+  @spec append_chat_cover(non_neg_integer(), String.t()) ::
+          {:ok, Attachment.t()} | {:error, Ecto.Changeset.t()}
   def append_chat_cover(chat_id, cover_path) do
     chat =
       case Repo.get(Chat, chat_id) do

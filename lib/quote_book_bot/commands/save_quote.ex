@@ -1,4 +1,11 @@
 defmodule QuoteBookBot.Commands.SaveQuote do
+  @moduledoc """
+  /сьлржалсч <глубинность> — сохраняет пересланные сообщения как цитату.
+
+  Глубинность указывает как глубоко необходимо подугражть вложенные сообщения.
+  Если глубинность равна нулю, то сохраняются только пересланные при сохранении
+  сообщения.
+  """
   import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 
