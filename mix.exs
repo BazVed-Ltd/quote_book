@@ -10,7 +10,16 @@ defmodule QuoteBook.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: releases()
+    ]
+  end
+
+  def releases do
+    [
+      quote_book: [
+        strip_beams: [keep: ["Docs"]]
+      ]
     ]
   end
 
@@ -56,7 +65,7 @@ defmodule QuoteBook.MixProject do
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:heroicons, "~> 0.5.2"},
       {:ecto_autoslug_field, github: "wemake-services/ecto_autoslug_field"},
-      {:vk_bot, github: "Waika28/vk_bot"},
+      {:vk_bot, github: "Waika28/vk_bot"}
     ]
   end
 
