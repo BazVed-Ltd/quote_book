@@ -55,7 +55,9 @@ if config_env() == :prod do
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :quote_book,
-    host: host
+    host: host,
+    back_url: System.get_env("BACK_URL") || "http://quote-book:#{port}",
+    screenshoter_url: System.get_env("SCREENSHOTER_URL") || "http://site-screenshoter"
 
   config :quote_book, QuoteBookWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
