@@ -10,11 +10,19 @@ services:
       - postgres:/data/postgres
     restart: unless-stopped
 
-  quote_book:
+  site-screenshoter:
+    build:
+      context: site-screenshoter
+    restart: unless-stopped
+    environment:
+      PORT: 80
+
+  quote-book:
     build:
       context: .
     depends_on:
       - postgres
+      - site-screenshoter
     environment:
       DATABASE_URL: "${DATABASE_URL:-postgresql://postgres:postgres@postgres/quote_book_prod}"
       PHX_SERVER: "${PHX_SERVER:-TRUE}"

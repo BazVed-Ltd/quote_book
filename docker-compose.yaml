@@ -12,6 +12,14 @@ services:
       - "5432:5432"
     restart: unless-stopped
 
+  site-screenshoter:
+    build:
+      context: site-screenshoter
+    restart: unless-stopped
+    environment:
+      PORT: 4001
+    network_mode: host
+
   pgadmin:
     image: dpage/pgadmin4
     environment:
