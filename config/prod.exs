@@ -16,7 +16,8 @@ config :logger, level: :info
 
 unless System.get_env("NO_DOCKER") do
   config :quote_book,
-    attachments_directory: "/app/attachments"
+    attachments_directory: "/app/attachments",
+    renders_directory: "/app/renders"
 end
 
 # ## SSL Support

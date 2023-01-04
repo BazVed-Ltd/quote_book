@@ -3,7 +3,7 @@ defmodule QuoteBookBot.Utils.Links do
   alias QuoteBook.Book.Chat
 
   defp host do
-    Application.get_env(:quote_book, :host, "localhost")
+    Application.get_env(:quote_book, :host, "localhost:4000")
   end
 
   @spec chat_link(Chat.t()) :: String.t()
@@ -22,7 +22,7 @@ defmodule QuoteBookBot.Utils.Links do
 
   @spec quote_link(Chat.t(), QuoteBook.Book.Message.t()) :: String.t()
   @doc """
-  Возвращает ссылку на цитату.
+  Возвращает красивую ссылку на цитату.
   """
   def quote_link(chat, message_quote) do
     path = QuoteBookWeb.Router.Helpers.live_path(
@@ -33,5 +33,20 @@ defmodule QuoteBookBot.Utils.Links do
     )
 
     host() <> path
+  end
+
+  @spec quote_path(QuoteBook.Book.Message.t()) :: String.t()
+  @doc """
+  Возвращает путь до цитаты.
+  """
+  def quote_path(message_quote) do
+    path = QuoteBookWeb.Router.Helpers.live_path(
+      QuoteBookWeb.Endpoint,
+      QuoteBookWeb.QuoteLive,
+      message_quote.peer_id,
+      message_quote.quote_id
+    )
+
+    path
   end
 end

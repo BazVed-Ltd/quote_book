@@ -266,6 +266,21 @@ defmodule QuoteBook.Book do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  def get_users_from_message(peer_id, quote_id) do
+    message_query =
+      {"message_tree", Message}
+      |> recursive_ctes(true)
+      |> with_cte("message_tree", as: fragment(@raw_sql_message_tree, ^peer_id, ^quote_id))
+
+    query =
+      from q in message_query,
+        left_join: u in User,
+        on: q.from_id == u.id,
+        select: u
+
+    Repo.all(query)
+  end
+
   @doc """
   Создаёт пользователя.
 
@@ -426,5 +441,101 @@ defmodule QuoteBook.Book do
     chat = Map.update(chat, :covers, [cover_path], &[cover_path | &1])
 
     Repo.insert_or_update(chat)
+  end
+
+  alias QuoteBook.Book.RenderedQuote
+
+  @doc """
+  Returns the list of rendered_quotes.
+
+  ## Examples
+
+      iex> list_rendered_quotes()
+      [%RenderedQuote{}, ...]
+
+  """
+  def list_rendered_quotes do
+    Repo.all(RenderedQuote)
+  end
+
+  @doc """
+  Gets a single rendered_quote.
+
+  Raises `Ecto.NoResultsError` if the Rendered quote does not exist.
+
+  ## Examples
+
+      iex> get_rendered_quote!(123)
+      %RenderedQuote{}
+
+      iex> get_rendered_quote!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_rendered_quote(id), do: Repo.get(RenderedQuote, id)
+
+  @doc """
+  Creates a rendered_quote.
+
+  ## Examples
+
+      iex> create_rendered_quote(%{field: value})
+      {:ok, %RenderedQuote{}}
+
+      iex> create_rendered_quote(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_rendered_quote(attrs \\ %{}) do
+    %RenderedQuote{}
+    |> RenderedQuote.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a rendered_quote.
+
+  ## Examples
+
+      iex> update_rendered_quote(rendered_quote, %{field: new_value})
+      {:ok, %RenderedQuote{}}
+
+      iex> update_rendered_quote(rendered_quote, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_rendered_quote(%RenderedQuote{} = rendered_quote, attrs) do
+    rendered_quote
+    |> RenderedQuote.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a rendered_quote.
+
+  ## Examples
+
+      iex> delete_rendered_quote(rendered_quote)
+      {:ok, %RenderedQuote{}}
+
+      iex> delete_rendered_quote(rendered_quote)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_rendered_quote(%RenderedQuote{} = rendered_quote) do
+    Repo.delete(rendered_quote)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking rendered_quote changes.
+
+  ## Examples
+
+      iex> change_rendered_quote(rendered_quote)
+      %Ecto.Changeset{data: %RenderedQuote{}}
+
+  """
+  def change_rendered_quote(%RenderedQuote{} = rendered_quote, attrs \\ %{}) do
+    RenderedQuote.changeset(rendered_quote, attrs)
   end
 end

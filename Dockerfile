@@ -82,9 +82,10 @@ ENV LC_ALL en_US.UTF-8
 WORKDIR "/app"
 RUN chown nobody /app
 
-RUN mkdir attachments
-RUN chown nobody attachments
-
+RUN mkdir attachments \
+    && chown nobody attachments \
+    && mkdir renders \
+    && chown nobody renders 
 
 # set runner ENV
 ENV MIX_ENV="prod"

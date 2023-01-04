@@ -10,7 +10,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     ~H"""
     <ul class="flex flex-col max-w-lg px-3 sm:px-0 mx-auto">
       <%= for quote_message <- @quotes do %>
-        <li>
+        <li class="mb-5">
           <.message_quote quote={quote_message} />
         </li>
       <% end %>
@@ -39,11 +39,12 @@ defmodule QuoteBookWeb.QuoteComponent do
         author: author,
         author_url: author_url,
         date: date,
-        formated_date: formated_date
+        formated_date: formated_date,
+        bot?: Map.get(assigns, :bot?, false)
       )
 
     ~H"""
-    <div class="card mb-5">
+    <div class={"card" <> if @bot? do "-borderless" else "" end}>
       <div class="flex border-b border-zinc-700 pb-2 mb-3">
         <div>#<%= @quote.quote_id %></div>
         <div
@@ -216,7 +217,7 @@ defmodule QuoteBookWeb.QuoteComponent do
 
       _ ->
         ~H"""
-        <span><a href={"/#{assigns.attachment.path}"}><%= @attachment.type %></a></span>
+        <span><a href={"#{assigns.attachment.path}"}><%= @attachment.type %></a></span>
         """
     end
   end

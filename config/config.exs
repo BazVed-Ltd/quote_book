@@ -63,7 +63,10 @@ config :quote_book, QuoteBook.Scheduler,
   ]
 
 config :quote_book,
-  attachments_directory: "priv/static/attachments"
+  attachments_directory: "priv/static/attachments",
+  renders_directory: "priv/static/renders",
+  back_url: "http://localhost:4000",
+  screenshoter_url: "http://localhost:4001"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

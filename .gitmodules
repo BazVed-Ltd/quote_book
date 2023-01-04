@@ -1,0 +1,3 @@
+[submodule "site-screenshoter"]
+	path = site-screenshoter
+	url = https://github.com/Waika28/site-screenshoter
