@@ -217,7 +217,7 @@ defmodule QuoteBookWeb.QuoteComponent do
 
       _ ->
         ~H"""
-        <span><a href={"/#{assigns.attachment.path}"}><%= @attachment.type %></a></span>
+        <span><a href={"#{assigns.attachment.path}"}><%= @attachment.type %></a></span>
         """
     end
   end
