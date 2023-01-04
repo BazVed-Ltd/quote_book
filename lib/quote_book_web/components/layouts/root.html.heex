@@ -12,10 +12,10 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}></script>
   </head>
   <body>
-    <%= if is_list(assigns[:nav_paths]) do %>
+    <%= if not is_nil(assigns[:breadcrumb]) do %>
       <nav class="flex container mx-auto max-w-lg bg-zinc-800 nav-border">
         <ol class="m-4 inline-flex items-center">
-          <%= for {{name, path}, index} <- @nav_paths |> Enum.reverse() |> Stream.with_index() do %>
+          <%= for {{name, path}, index} <- @breadcrumb |> QuoteBookWeb.Helpers.Breadcrumb.to_list() |> Stream.with_index() do %>
             <li class="inline-flex items-center">
               <.link class="inline-flex items-center" href={path}>
                 <%= unless index == 0 do %>
