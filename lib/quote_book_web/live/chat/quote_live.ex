@@ -10,8 +10,10 @@ defmodule QuoteBookWeb.QuoteLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col max-w-lg px-3 sm:px-0 mx-auto my-5">
-      <QuoteBookWeb.QuoteComponent.message_quote quote={@quote} />
+    <div class="mx-auto mt-5 max-w-lg">
+      <div id="quote">
+        <QuoteBookWeb.QuoteComponent.message_quote quote={@quote} />
+      </div>
     </div>
     """
   end
