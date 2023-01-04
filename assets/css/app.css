@@ -11,6 +11,10 @@ html {
   @apply bg-zinc-800 p-4 border border-zinc-600 rounded-xl;
 }
 
+.card-borderless {
+  @apply bg-zinc-800 p-4;
+}
+
 a {
   @apply text-blue-400;
 }

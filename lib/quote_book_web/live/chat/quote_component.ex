@@ -39,11 +39,12 @@ defmodule QuoteBookWeb.QuoteComponent do
         author: author,
         author_url: author_url,
         date: date,
-        formated_date: formated_date
+        formated_date: formated_date,
+        bot?: Map.get(assigns, :bot?, false)
       )
 
     ~H"""
-    <div class="card">
+    <div class={"card" <> if @bot? do "-borderless" else "" end}>
       <div class="flex border-b border-zinc-700 pb-2 mb-3">
         <div>#<%= @quote.quote_id %></div>
         <div
