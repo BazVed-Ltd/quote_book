@@ -40,6 +40,7 @@ defmodule QuoteBook.Book.Message do
     id: non_neg_integer() | nil,
     quote_id: non_neg_integer() | nil,
     peer_id: non_neg_integer() | nil,
+    from_id: non_neg_integer() | nil,
     text: String.t() | nil,
     date: non_neg_integer() | nil,
     reply_message_id: non_neg_integer() | nil,

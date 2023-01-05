@@ -8,6 +8,7 @@ defmodule QuoteBook.Book.Chat do
   alias QuoteBook.Book.Chat.TitleSlug
 
   @type t :: %__MODULE__{
+          id: non_neg_integer() | nil,
           title: String.t() | nil,
           covers: [String.t()] | nil,
           slug: String.t() | nil,
