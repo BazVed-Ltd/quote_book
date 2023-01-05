@@ -13,6 +13,12 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
 
   @time_for_deletion_in_seconds 1 * 24 * 60 * 60
 
+  @succes_message "Цитата %1 успешно удалена!"
+  @arg_error_message "Нужно указать айди удаляемой цитаты.\nДля справки используйте «/помощь удалить»."
+  @wrong_id_error_message "Вы указали неправильный айди удаляемой цитаты."
+  @deletion_time_error_message "Вы не можете удалить эту цитату. Она теперь часть истории."
+  @permission_error_message "У вас нет прав на удаление этой цитаты."
+
   defcommand request,
     predicate: [on_text: "/удалить", in: :chat] do
     message = request.message
@@ -22,7 +28,7 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
            quote_id = Book.quote_index_to_quote_id(message["peer_id"], index),
            {:ok, quote_message} <- Book.fetch_quote(message["peer_id"], quote_id),
            {:ok, deleted_quote} <- try_delete_quote(quote_message, message["from_id"]) do
-        "Цитата #{deleted_quote.quote_id} успешно удалена!"
+        String.replace(@succes_message, "%1", Integer.to_string(deleted_quote.quote_id))
       else
         {:error, error} -> error
       end
@@ -37,8 +43,7 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
 
     case args do
       [_command] ->
-        {:error,
-         "Нужно указать айди удаляемой цитаты.\nДля справки используйте «/помощь удалить»."}
+        {:error, @arg_error_message}
 
       [_command, "п"] ->
         {:ok, -1}
@@ -47,15 +52,14 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
         parse_quote_id(quote_id)
 
       [_command | _rest] ->
-        {:error,
-         "Нужно указать айди удаляемой цитаты.\nДля справки используйте «/помощь удалить»."}
+        {:error, @arg_error_message}
     end
   end
 
   defp parse_quote_id(quote_id) do
     case Integer.parse(quote_id) do
       {id, ""} -> {:ok, id}
-      _ -> {:error, "Вы указали неправильный айди удаляемой цитаты."}
+      _ -> {:error, @wrong_id_error_message}
     end
   end
 
@@ -77,7 +81,7 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
 
       # is author
       [true, _, false, _] ->
-        {:error, "Вы не можете удалить эту цитату. Она теперь часть истории."}
+        {:error, @deletion_time_error_message}
 
       [true, _, _, true] ->
         {:ok, Book.delete_quote!(quote_message)}
@@ -87,7 +91,7 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
 
       # nor admin nor author
       [false, false, _, _] ->
-        {:error, "У вас нет прав на удаление этой цитаты."}
+        {:error, @permission_error_message}
     end
   end
 
