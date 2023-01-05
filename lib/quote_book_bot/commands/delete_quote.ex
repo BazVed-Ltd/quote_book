@@ -11,6 +11,8 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
 
   alias QuoteBook.Book
 
+  @time_for_deletion_in_seconds 1 * 24 * 60 * 60
+
   defcommand request,
     predicate: [on_text: "/удалить", in: :chat] do
     message = request.message
@@ -61,18 +63,31 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
     tasks = [
       Task.async(fn -> author?(quote_message, user_id) end),
       Task.async(fn -> admin?(quote_message, user_id) end),
+      Task.async(fn -> created_in_the_last_five_minutes?(quote_message) end),
       Task.async(fn -> last_quote?(quote_message) end)
     ]
 
     case Task.await_many(tasks) do
       # is admin
-      [_, true, true] -> {:ok, Book.delete_quote!(quote_message)}
-      [_, true, false] -> {:ok, Book.mark_quote_as_deleted!(quote_message)}
+      [_, true, _, true] ->
+        {:ok, Book.delete_quote!(quote_message)}
+
+      [_, true, _, false] ->
+        {:ok, Book.mark_quote_as_deleted!(quote_message)}
+
       # is author
-      [true, _, true] -> {:ok, Book.delete_quote!(quote_message)}
-      [true, _, false] -> {:ok, Book.mark_quote_as_deleted!(quote_message)}
+      [true, _, false, _] ->
+        {:error, "Вы не можете удалить эту цитату. Она теперь часть истории."}
+
+      [true, _, _, true] ->
+        {:ok, Book.delete_quote!(quote_message)}
+
+      [true, _, _, false] ->
+        {:ok, Book.mark_quote_as_deleted!(quote_message)}
+
       # nor admin nor author
-      [false, false, _] -> {:error, "У вас нет прав на удаление этой цитаты."}
+      [false, false, _, _] ->
+        {:error, "У вас нет прав на удаление этой цитаты."}
     end
   end
 
@@ -85,6 +100,13 @@ defmodule QuoteBookBot.Commands.DeleteQuote do
     |> Map.fetch!("items")
     |> Enum.find(%{}, fn user -> Map.fetch!(user, "member_id") == user_id end)
     |> Map.get("is_admin", false)
+  end
+
+  def created_in_the_last_five_minutes?(quote_message) do
+    created = DateTime.from_naive!(quote_message.inserted_at, "Etc/UTC")
+    now = DateTime.now!("Etc/UTC")
+
+    DateTime.diff(now, created) < @time_for_deletion_in_seconds
   end
 
   defp last_quote?(quote_message) do
