@@ -84,6 +84,25 @@ defmodule QuoteBook.Book do
     |> List.first()
   end
 
+  def fetch_quote(peer_id, quote_id) do
+    query =
+      from m in Message,
+        where: m.peer_id == ^peer_id and m.quote_id == ^quote_id and not m.deleted
+
+    quote_message = Repo.one(query)
+
+    case quote_message do
+      nil -> {:error, "Цитата не найдена"}
+      _ -> {:ok, quote_message}
+    end
+  end
+
+  def quote_index_to_quote_id(_peer_id, quote_index) when quote_index >= 0, do: quote_index
+
+  def quote_index_to_quote_id(peer_id, quote_index) do
+    get_last_quote_id(peer_id) + quote_index + 1
+  end
+
   @spec remake_tree([Message.t()]) :: [Message.t()]
   # doc
   #   Из списка сообщений восстанавливает дерево.
@@ -133,76 +152,16 @@ defmodule QuoteBook.Book do
     |> Repo.insert()
   end
 
-  @spec maybe_delete_quote(non_neg_integer(), integer(), non_neg_integer()) :: :deleted | :nothing
-  @doc """
-  Условно удаляет цитату. Тоже, что и `maybe_delete_quote_by_admin/2`, но
-  возвращает `:nothing`, если цитата не принадлежит пользователю.
-  """
-  def maybe_delete_quote(peer_id, quote_id, from_id) do
-    query =
-      from m in Message,
-        where:
-          m.peer_id == ^peer_id and m.from_id == ^from_id and not m.deleted and
-            m.quote_id ==
-              fragment(
-                "(CASE WHEN ? > 0 THEN ? ELSE (SELECT max(quote_id) FROM messages) + ? + 1 END)",
-                ^quote_id,
-                ^quote_id,
-                ^quote_id
-              )
-
-    maybe_delete_or_update_by_query(query)
+  @spec mark_quote_as_deleted!(Message.t()) :: Message.t()
+  def mark_quote_as_deleted!(quote_message) do
+    quote_message
+    |> Message.changeset_deletion(%{deleted: true})
+    |> Repo.update!()
   end
 
-  @spec maybe_delete_quote_by_admin(non_neg_integer(), integer()) :: :deleted | :nothing
-  @doc """
-  Условно удаляет цитату. Должно выполняться __только__ для администраторов чата.
-
-  Полностью удаляет цитату в чате, если она является последней созданной
-  в этом чате; если цитата  не является последней, то устанавливается флаг
-  `deleted = true`. В обоих случаях вернётся `:deleted`.
-
-  Если такой цитаты или чата не существует, то возвращается `:nothing`.
-  """
-  def maybe_delete_quote_by_admin(peer_id, quote_id) do
-    query =
-      from m in Message,
-        where:
-          m.peer_id == ^peer_id and not m.deleted and
-            m.quote_id ==
-              fragment(
-                "(CASE WHEN ? > 0 THEN ? ELSE (SELECT max(quote_id) FROM messages) + ? + 1 END)",
-                ^quote_id,
-                ^quote_id,
-                ^quote_id
-              )
-
-    maybe_delete_or_update_by_query(query)
-  end
-
-  defp maybe_delete_or_update_by_query(query) do
-    query
-    |> Repo.one()
-    |> maybe_delete_or_update()
-  end
-
-  defp maybe_delete_or_update(nil), do: :nothing
-
-  defp maybe_delete_or_update(quote_message) do
-    last_quote_id = get_last_quote_id(quote_message.peer_id)
-
-    if quote_message.quote_id == last_quote_id do
-      Repo.delete!(quote_message)
-    else
-      query =
-        from m in Message,
-          where: m.quote_id == ^quote_message.quote_id,
-          update: [set: [deleted: true]]
-
-      Repo.update_all(query, [])
-    end
-
-    :deleted
+  @spec delete_quote!(Message.t()) :: Message.t()
+  def delete_quote!(quote_message) do
+    Repo.delete!(quote_message)
   end
 
   @spec insert_users(any()) :: {:ok, %{String.t() => User.t()}}

@@ -87,6 +87,12 @@ defmodule QuoteBook.Book.Message do
     |> cast_quote_id()
   end
 
+  def changeset_deletion(message, attrs) do
+    message
+    |> cast(attrs, [:deleted])
+    |> validate_required([:deleted])
+  end
+
   @spec cast_quote_id(Ecto.Changeset.t()) :: Ecto.Changeset.t()
   def cast_quote_id(message) do
     peer_id = get_field(message, :peer_id)
