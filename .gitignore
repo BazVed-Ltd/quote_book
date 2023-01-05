@@ -33,6 +33,9 @@ config/*.secret.exs
 # Ignore downloaded attachments
 /priv/static/attachments
 
+# Ignore rendered quotes
+/priv/static/renders
+
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 
