@@ -23,7 +23,10 @@ defmodule QuoteBookWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: QuoteBookWeb
+      use Phoenix.Controller,
+        namespace: QuoteBookWeb,
+        formats: [:html, :json],
+        layouts: [html: QuoteBookWeb.Layouts]
 
       import Plug.Conn
       import QuoteBookWeb.Gettext
