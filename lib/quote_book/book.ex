@@ -196,8 +196,6 @@ defmodule QuoteBook.Book do
   Отбрасывает `id` тех пользователей, что уже добавлены в БД.
   """
   def reject_exists_user(user_ids) do
-    # TODO: проверить, будет ли оно работать с сообществами.
-    #      Ощущение, что тут может быть баг.
     query =
       from u in User,
         where: u.id in ^user_ids,
