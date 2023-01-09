@@ -65,6 +65,8 @@ defmodule QuoteBook.MixProject do
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:heroicons, "~> 0.5.2"},
       {:ecto_autoslug_field, github: "wemake-services/ecto_autoslug_field"},
+      {:guardian, "~> 2.0"},
+      {:guardian_phoenix, "~> 2.0"},
       {:vk_bot, github: "Waika28/vk_bot"}
     ]
   end

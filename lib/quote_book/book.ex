@@ -223,6 +223,13 @@ defmodule QuoteBook.Book do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  def get_user(id) do
+    case Repo.get(User, id) do
+      nil -> {:error, "Not found"}
+      user -> {:ok, user}
+    end
+  end
+
   def get_users_from_message(peer_id, quote_id) do
     message_query =
       {"message_tree", Message}
