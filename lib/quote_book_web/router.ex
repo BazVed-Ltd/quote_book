@@ -1,5 +1,8 @@
 defmodule QuoteBookWeb.Router do
+  alias QuoteBookWeb.LoginAPIController
   use QuoteBookWeb, :router
+
+  import QuoteBookWeb.Helpers.Auth
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -8,6 +11,7 @@ defmodule QuoteBookWeb.Router do
     plug :put_root_layout, {QuoteBookWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
   pipeline :api do
@@ -15,11 +19,28 @@ defmodule QuoteBookWeb.Router do
   end
 
   scope "/", QuoteBookWeb do
-    pipe_through :browser
+    pipe_through [:browser]
 
-    live "/", IndexLive
-    live "/c/:peer_id", ChatLive
-    live "/c/:peer_id/:quote_id", QuoteLive
+    live_session :current_user,
+      on_mount: [{QuoteBookWeb.Helpers.Auth, :mount_current_user}] do
+      live "/", IndexLive
+      live "/c/:peer_id", ChatLive
+      live "/c/:peer_id/:quote_id", QuoteLive
+    end
+  end
+
+  scope "/", QuoteBookWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    live_session :sign_in,
+      on_mount: [{QuoteBookWeb.Helpers.Auth, :redirect_if_user_is_authenticated}] do
+      live "/sign-in", SignInLive
+    end
+  end
+
+  scope "/", QuoteBookWeb do
+    pipe_through [:api]
+    post "/sign-in", SignInController, :create
   end
 
   # Other scopes may use custom stacks.

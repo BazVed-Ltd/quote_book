@@ -39,6 +39,9 @@ if config_env() == :prod do
   config :vk_bot,
     token: System.get_env("VK_TOKEN")
 
+  config :quote_book,
+    vk_app_token: String.to_integer("VK_APP_TOKEN")
+
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want
