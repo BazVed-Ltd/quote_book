@@ -43,6 +43,18 @@ defmodule QuoteBook.Book do
     Repo.all(Chat)
   end
 
+  @spec get_chats([non_neg_integer()]) :: [Chat.t()]
+  @doc """
+  Возвращет список определённых чатов.
+  """
+  def get_chats(ids) do
+    query =
+      from c in Chat,
+        where: c.id in ^ids
+
+    Repo.all(query)
+  end
+
   @spec get_last_quote_id(non_neg_integer()) :: non_neg_integer() | nil
   @doc """
   Возвращает id последней цитаты в чате.
