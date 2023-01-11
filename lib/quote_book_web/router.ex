@@ -1,5 +1,4 @@
 defmodule QuoteBookWeb.Router do
-  alias QuoteBookWeb.LoginAPIController
   use QuoteBookWeb, :router
 
   import QuoteBookWeb.Helpers.Auth
