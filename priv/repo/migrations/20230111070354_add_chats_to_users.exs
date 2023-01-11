@@ -3,7 +3,7 @@ defmodule QuoteBook.Repo.Migrations.AddChatsToUsers do
 
   def change do
     alter table(:users) do
-      add :chats, {:array, :bigint}
+      add :chat_ids, {:array, :bigint}
     end
   end
 end

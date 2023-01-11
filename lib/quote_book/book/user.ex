@@ -13,7 +13,7 @@ defmodule QuoteBook.Book.User do
           id: non_neg_integer() | nil,
           current_photo: String.t() | nil,
           name: String.t() | nil,
-          chats: [non_neg_integer()] | nil
+          chat_ids: [non_neg_integer()] | nil
         }
 
   schema "users" do
@@ -23,7 +23,7 @@ defmodule QuoteBook.Book.User do
     field :first_name, :string, virtual: true
     field :last_name, :string, virtual: true
 
-    field :chats, {:array, :integer}
+    field :chat_ids, {:array, :integer}
 
     timestamps()
   end
@@ -31,7 +31,7 @@ defmodule QuoteBook.Book.User do
   @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:id, :name, :first_name, :last_name, :current_photo, :chats])
+    |> cast(attrs, [:id, :name, :first_name, :last_name, :current_photo, :chat_ids])
     |> validate_required([:id, :current_photo])
     |> cast_by_type()
     |> cast_name_from_first_and_last()

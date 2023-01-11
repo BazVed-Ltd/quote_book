@@ -148,7 +148,7 @@ defmodule QuoteBookBot.Utils.UserLoader do
         end)
         |> Enum.concat()
 
-      QuoteBook.Book.change_user(user, %{chats: chats})
+      QuoteBook.Book.change_user(user, %{chat_ids: chats})
     end)
     |> Book.update_users()
   end
