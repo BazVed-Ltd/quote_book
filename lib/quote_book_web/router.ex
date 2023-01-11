@@ -1,7 +1,8 @@
 defmodule QuoteBookWeb.Router do
   use QuoteBookWeb, :router
 
-  import QuoteBookWeb.Helpers.Auth
+  alias QuoteBookWeb.Helpers.Auth
+  import Auth
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -20,9 +21,13 @@ defmodule QuoteBookWeb.Router do
   scope "/", QuoteBookWeb do
     pipe_through [:browser]
 
-    live_session :current_user,
-      on_mount: [{QuoteBookWeb.Helpers.Auth, :mount_current_user}] do
+    live_session :index,
+      on_mount: [{Auth, :mount_current_user}] do
       live "/", IndexLive
+    end
+
+    live_session :chats,
+      on_mount: [{Auth, :mount_current_user}, {Auth, :ensure_authenticated}] do
       live "/c/:peer_id", ChatLive
       live "/c/:peer_id/:quote_id", QuoteLive
     end
