@@ -319,6 +319,12 @@ defmodule QuoteBook.Book do
     User.changeset(user, attrs)
   end
 
+  def maybe_create_user(user, attrs) do
+    user
+    |> User.changeset(attrs)
+    |> Repo.insert(on_conflict: :nothing)
+  end
+
   @spec get_chat(non_neg_integer()) :: Chat.t() | nil
   @doc """
   Возвращает чат по `id`.

@@ -1,12 +1,14 @@
 defmodule QuoteBookWeb.SignInController do
+
+  alias QuoteBook.Book.User
   use QuoteBookWeb, :controller
 
   def create(conn, %{"token" => silent_token, "uuid" => uuid, "user" => %{"id" => user_id}}) do
     case check_user(uuid, silent_token, user_id) do
-      {:ok, user} ->
+      {:ok, user_attrs} ->
+        user_attrs = convert_vk_response_to_db(user_attrs)
 
-        user = convert_vk_response_to_db(user)
-        {:ok, %{0 => user}} = QuoteBook.Book.insert_users([user])
+        {:ok, user} = QuoteBook.Book.maybe_create_user(%User{}, user_attrs)
 
         {:ok, token, _claims} = QuoteBook.Guardian.encode_and_sign(user)
 
@@ -50,11 +52,11 @@ defmodule QuoteBookWeb.SignInController do
          "last_name" => last_name,
          "photo_100" => current_photo
        }) do
-        %{
-          id: id,
-          first_name: first_name,
-          last_name: last_name,
-          current_photo: current_photo
-        }
+    %{
+      id: id,
+      first_name: first_name,
+      last_name: last_name,
+      current_photo: current_photo
+    }
   end
 end
