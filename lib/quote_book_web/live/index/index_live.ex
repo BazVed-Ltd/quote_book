@@ -6,15 +6,13 @@ defmodule QuoteBookWeb.IndexLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    user_id = socket.assigns.current_user
+    user = socket.assigns.current_user
 
     chats =
-      with false <- is_nil(user_id),
-           user = Book.get_user!(user_id),
-           false <- is_nil(user.chat_ids) do
-        Book.get_chats(user.chat_ids)
+      if is_nil(user) or is_nil(user.chat_ids) do
+        []
       else
-        _err -> []
+        Book.get_chats(user.chat_ids)
       end
 
     {:ok,
@@ -40,9 +38,9 @@ defmodule QuoteBookWeb.IndexLive do
       </div>
       <%= if @current_user do %>
         <div class="w-50 mx-auto mt-5">
-          <.link href={"https://vk.com/id#{@current_user}"} class="btn btn-vk-blue font-medium">
-            Моя страница в ВК
-          </.link>
+          <p>
+            Вы вошли как <%= @current_user.name %>
+          </p>
         </div>
       <% else %>
         <div class="w-40 mx-auto mt-5">

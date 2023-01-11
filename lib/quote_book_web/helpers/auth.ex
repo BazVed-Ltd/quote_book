@@ -7,8 +7,8 @@ defmodule QuoteBookWeb.Helpers.Auth do
   def fetch_current_user(conn, _opts) do
     with {token, conn} <- ensure_user_token(conn),
          {:ok, claims} <- QuoteBook.Guardian.decode_and_verify(token, %{"typ" => "access"}),
-         {:ok, user_id} <- QuoteBook.Guardian.resource_from_claims(claims) do
-      assign(conn, :current_user, user_id)
+         {:ok, user} <- QuoteBook.Guardian.resource_from_claims(claims) do
+      assign(conn, :current_user, user)
     else
       _err -> conn
     end
@@ -93,8 +93,8 @@ defmodule QuoteBookWeb.Helpers.Auth do
       %{"user_token" => user_token} ->
         Phoenix.Component.assign_new(socket, :current_user, fn ->
           {:ok, claims} = QuoteBook.Guardian.decode_and_verify(user_token, %{"typ" => "access"})
-          {:ok, user_id} = QuoteBook.Guardian.resource_from_claims(claims)
-          user_id
+          {:ok, user} = QuoteBook.Guardian.resource_from_claims(claims)
+          user
         end)
 
       %{} ->

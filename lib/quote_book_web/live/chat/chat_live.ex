@@ -7,8 +7,6 @@ defmodule QuoteBookWeb.ChatLive do
   alias QuoteBookWeb.QuoteComponent
 
   on_mount {QuoteBookWeb.Helpers.Loader, :chat}
-  on_mount {QuoteBookWeb.Helpers.Loader, :user}
-  on_mount QuoteBookWeb.Helpers.ChatAccess
 
   @impl true
   def mount(_params, _session, socket) do

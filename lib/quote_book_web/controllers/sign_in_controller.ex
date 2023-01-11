@@ -4,14 +4,15 @@ defmodule QuoteBookWeb.SignInController do
   def create(conn, %{"token" => silent_token, "uuid" => uuid, "user" => %{"id" => user_id}}) do
     case check_user(uuid, silent_token, user_id) do
       {:ok, user} ->
-        {:ok, token, _claims} = QuoteBook.Guardian.encode_and_sign(user_id)
+
+        user = convert_vk_response_to_db(user)
+        {:ok, %{0 => user}} = QuoteBook.Book.insert_users([user])
+
+        {:ok, token, _claims} = QuoteBook.Guardian.encode_and_sign(user)
 
         key =
           Guardian.Plug.Keys.token_key(:default)
           |> Atom.to_string()
-
-        user = convert_vk_response_to_db(user)
-        {:ok, _user} = QuoteBook.Book.insert_users([user])
 
         conn
         |> put_resp_cookie(key, token, secure: true, sign: true)

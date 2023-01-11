@@ -84,13 +84,4 @@ defmodule QuoteBookWeb.Helpers.Loader do
         )
     end
   end
-
-  def on_mount(:user, _params, _session, socket) do
-    if is_nil(socket.assigns.current_user),
-      do: throw("User must be authorized.")
-
-    {:cont,
-     socket
-     |> assign(user: Book.get_user!(socket.assigns.current_user))}
-  end
 end

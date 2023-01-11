@@ -11,7 +11,7 @@ defmodule QuoteBook.Guardian do
   end
 
   def resource_from_claims(%{"sub" => id}) do
-    QuoteBook.Book.get_user(id)
+    {:ok, QuoteBook.Book.get_user!(id)}
   end
 
   def resource_from_claims(_claims) do
