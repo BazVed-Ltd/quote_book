@@ -54,7 +54,7 @@ defmodule QuoteBookWeb.Helpers.Loader do
       |> Book.get_chat_by_slug_or_id()
 
     if is_nil(chat) do
-      redirect_on_error(socket, to: ~p"/", error: "Нет такого чата")
+      redirect_on_error(socket, to: ~p"/", error: "Нет такого чата.")
     else
       {:cont,
        socket
@@ -65,7 +65,7 @@ defmodule QuoteBookWeb.Helpers.Loader do
 
   def on_mount(:quote, params, _session, socket) do
     unless Map.has_key?(socket.assigns, :chat),
-      do: throw("Before assigning a quote, you need to assign chat")
+      do: throw("Before assigning a quote, you need to assign chat.")
 
     chat = socket.assigns.chat
 
@@ -83,5 +83,14 @@ defmodule QuoteBookWeb.Helpers.Loader do
           error: "Нет такой цитаты"
         )
     end
+  end
+
+  def on_mount(:user, _params, _session, socket) do
+    if is_nil(socket.assigns.current_user),
+      do: throw("User must be authorized.")
+
+    {:cont,
+     socket
+     |> assign(user: Book.get_user!(socket.assigns.current_user))}
   end
 end

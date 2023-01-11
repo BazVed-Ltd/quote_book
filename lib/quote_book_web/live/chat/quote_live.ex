@@ -3,6 +3,8 @@ defmodule QuoteBookWeb.QuoteLive do
 
   on_mount {QuoteBookWeb.Helpers.Loader, :chat}
   on_mount {QuoteBookWeb.Helpers.Loader, :quote}
+  on_mount {QuoteBookWeb.Helpers.Loader, :user}
+  on_mount QuoteBookWeb.Helpers.ChatAccess
 
   def mount(params, _session, socket) do
     bot? = Map.get(params, "bot") == "true"
