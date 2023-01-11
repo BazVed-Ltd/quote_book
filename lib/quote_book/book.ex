@@ -176,7 +176,7 @@ defmodule QuoteBook.Book do
     Repo.delete!(quote_message)
   end
 
-  @spec insert_users(any()) :: {:ok, %{String.t() => User.t()}}
+  @spec insert_users(any()) :: {:ok, %{non_neg_integer() => User.t()}}
   @doc """
   Добавляет пользователей в БД одной транзакцией.
   """
