@@ -109,17 +109,21 @@ defmodule QuoteBookBot.Utils.UserLoader do
     i = i + 1;
   }
 
-  groups = API.groups.getById({ group_ids: groups, fields: "photo_100" });
+  if (groups.length != 0) {
+    groups = API.groups.getById({ group_ids: groups, fields: "photo_100" });
 
-  i = 0;
-  var groupsLength = groups.length;
-  while (i < groupsLength) {
-    results.push({
-      id: groups[i].id + 2000000000,
-      name: groups[i].name,
-      current_photo: groups[i].photo_100,
-    });
-    i = i + 1;
+    i = 0;
+    var groupsLength = groups.length;
+    while (i < groupsLength) {
+      results.push({
+        id: groups[i].id + 2000000000,
+        name: groups[i].name,
+        current_photo: groups[i].photo_100,
+      });
+      i = i + 1;
+    }
+  } else {
+    groups = [];
   }
 
   return results;
