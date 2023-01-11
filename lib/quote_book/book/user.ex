@@ -13,7 +13,7 @@ defmodule QuoteBook.Book.User do
           id: non_neg_integer() | nil,
           current_photo: String.t() | nil,
           name: String.t() | nil,
-          chats: [non_neg_integer()]
+          chats: [non_neg_integer()] | nil
         }
 
   schema "users" do
