@@ -129,4 +129,65 @@ defmodule QuoteBookBot.Utils.UserLoader do
     joined_ids = Enum.join(ids, ", ")
     String.replace(@get_users_code, "%1", joined_ids)
   end
+
+  def sync_chats_members do
+    users =
+      Book.list_users()
+      |> Stream.reject(fn user -> user.id > 2_000_000_000 end)
+
+    chat_chunks =
+      Book.list_chats()
+      |> Stream.chunk_every(25)
+
+    users
+    |> Enum.map(fn user ->
+      chats =
+        Stream.map(chat_chunks, fn chat_chunk ->
+          chat_chunk_ids = Enum.map(chat_chunk, &Map.fetch!(&1, :id))
+          get_member_chats(user.id, chat_chunk_ids)
+        end)
+        |> Enum.concat()
+
+      QuoteBook.Book.change_user(user, %{chats: chats})
+    end)
+    |> Book.update_users()
+  end
+
+  def get_member_chats(user_id, chat_ids) do
+    code = generate_get_member_chats_code(user_id, chat_ids)
+    VkBot.Api.exec_method("execute", %{"code" => code})
+  end
+
+  @get_member_chats_code """
+  var user = %1;
+  var conversations = [%2];
+
+  var result = [];
+
+  var conversationsLength = conversations.length;
+  var i = 0;
+  while (i < conversationsLength) {
+    var conversation = API.messages.getConversationMembers({peer_id: conversations[i]});
+
+    var itemsLength = conversation.items.length;
+    var j = 0;
+    while (j < itemsLength) {
+      if (conversation.items[j].member_id == user) {
+        result.push(conversations[i]);
+      }
+      j = j + 1;
+    }
+    i = i + 1;
+  }
+
+  return result;
+  """
+
+  defp generate_get_member_chats_code(user, chat_ids) do
+    joined_ids = Enum.join(chat_ids, ", ")
+
+    @get_member_chats_code
+    |> String.replace("%1", to_string(user))
+    |> String.replace("%2", joined_ids)
+  end
 end
