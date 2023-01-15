@@ -4,7 +4,7 @@ defmodule QuoteBook.MixProject do
   def project do
     [
       app: :quote_book,
-      version: "1.6.0",
+      version: "1.6.1",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -67,6 +67,7 @@ defmodule QuoteBook.MixProject do
       {:ecto_autoslug_field, github: "wemake-services/ecto_autoslug_field"},
       {:guardian, "~> 2.0"},
       {:guardian_phoenix, "~> 2.0"},
+      {:hammer, "~> 6.1"},
       {:vk_bot, github: "Waika28/vk_bot"}
     ]
   end
