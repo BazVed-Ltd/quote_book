@@ -63,10 +63,10 @@ defmodule QuoteBookWeb.Helpers.Auth do
     {:cont, mount_current_user(session, socket)}
   end
 
-  def on_mount(:ensure_authenticated, _params, session, socket) do
+  def on_mount(:ensure_authenticated, params, session, socket) do
     socket = mount_current_user(session, socket)
 
-    if socket.assigns.current_user do
+    if not is_nil(socket.assigns.current_user) or bot?(params) do
       {:cont, socket}
     else
       socket =
@@ -85,6 +85,14 @@ defmodule QuoteBookWeb.Helpers.Auth do
       {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
     else
       {:cont, socket}
+    end
+  end
+
+  defp bot?(params) do
+    key = Application.get_env(:quote_book, :screenshoter_key)
+
+    if !is_nil(key) and params["bot"] == "true" do
+      params["bot_key"] == key or key == :dev
     end
   end
 

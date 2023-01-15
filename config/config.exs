@@ -73,7 +73,8 @@ config :quote_book,
   attachments_directory: "priv/static/attachments",
   renders_directory: "priv/static/renders",
   back_url: "http://localhost:4000",
-  screenshoter_url: "http://localhost:4001"
+  screenshoter_url: "http://localhost:4001",
+  screenshoter_key: config_env()
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
