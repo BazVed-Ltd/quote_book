@@ -23,6 +23,19 @@ a:hover {
   @apply underline decoration-solid;
 }
 
+.btn {
+  @apply py-3 px-4 rounded-xl;
+}
+.btn:hover {
+  @apply no-underline
+}
+.btn-vk-blue {
+  @apply bg-vk-blue text-white;
+}
+.btn-vk-blue:hover {
+  @apply opacity-80;
+}
+
 .pl-nested {
   padding-left: 3.22rem;
 }

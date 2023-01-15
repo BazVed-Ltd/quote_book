@@ -8,9 +8,11 @@ defmodule QuoteBook.Book.Chat do
   alias QuoteBook.Book.Chat.TitleSlug
 
   @type t :: %__MODULE__{
+          id: non_neg_integer() | nil,
           title: String.t() | nil,
           covers: [String.t()] | nil,
           slug: String.t() | nil,
+          synced_at: NaiveDateTime.t() | nil
         }
 
   schema "chats" do
@@ -19,13 +21,15 @@ defmodule QuoteBook.Book.Chat do
 
     field :slug, TitleSlug.Type
 
+    field :synced_at, :naive_datetime
+
     timestamps()
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [:id, :title, :covers])
+    |> cast(attrs, [:id, :title, :covers, :synced_at])
     |> validate_required([:id])
     |> unique_constraint(:title,
       message: "Чат с таким названием уже существует. Попробуйте другое"

@@ -2,6 +2,7 @@ defmodule QuoteBookBot.Commands.RenderQuote do
   @moduledoc """
   /сь <id> — отправить картинку с цитатой
   """
+  alias QuoteBookBot.Utils.QuoteToPNG
   import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 
@@ -28,6 +29,6 @@ defmodule QuoteBookBot.Commands.RenderQuote do
   end
 
   defp render_quote(quote_message) do
-    QuoteBookBot.Utils.QuoteToPNG.convert(quote_message)
+    QuoteToPNG.convert(quote_message)
   end
 end

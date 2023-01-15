@@ -40,6 +40,7 @@ defmodule QuoteBook.Book.Message do
     id: non_neg_integer() | nil,
     quote_id: non_neg_integer() | nil,
     peer_id: non_neg_integer() | nil,
+    from_id: non_neg_integer() | nil,
     text: String.t() | nil,
     date: non_neg_integer() | nil,
     reply_message_id: non_neg_integer() | nil,
@@ -84,6 +85,12 @@ defmodule QuoteBook.Book.Message do
     |> cast(attrs, [:peer_id, :deleted])
     |> validate_required([:peer_id])
     |> cast_quote_id()
+  end
+
+  def changeset_deletion(message, attrs) do
+    message
+    |> cast(attrs, [:deleted])
+    |> validate_required([:deleted])
   end
 
   @spec cast_quote_id(Ecto.Changeset.t()) :: Ecto.Changeset.t()

@@ -29,6 +29,7 @@ services:
       PHX_HOST: "${PHX_HOST}"
       SECRET_KEY_BASE: "${SECRET_KEY_BASE}"
       VK_TOKEN: "${VK_TOKEN}"
+      VK_APP_TOKEN: "${VK_APP_TOKEN}"
     ports:
       - ${PORT}:4000
     volumes:

@@ -7,7 +7,7 @@ defmodule QuoteBook.Book do
   alias Ecto.Multi
   alias QuoteBook.Repo
 
-  alias QuoteBook.Book.{Message, User, Chat, Attachment}
+  alias QuoteBook.Book.{Attachment, Chat, Message, User}
 
   @raw_sql_all_messages """
   SELECT *
@@ -39,8 +39,20 @@ defmodule QuoteBook.Book do
   @doc """
   Возвращет список чатов.
   """
-  def list_chats() do
+  def list_chats do
     Repo.all(Chat)
+  end
+
+  @spec get_chats([non_neg_integer()]) :: [Chat.t()]
+  @doc """
+  Возвращет список определённых чатов.
+  """
+  def get_chats(ids) do
+    query =
+      from c in Chat,
+        where: c.id in ^ids
+
+    Repo.all(query)
   end
 
   @spec get_last_quote_id(non_neg_integer()) :: non_neg_integer() | nil
@@ -82,6 +94,25 @@ defmodule QuoteBook.Book do
     Repo.all(query)
     |> remake_tree()
     |> List.first()
+  end
+
+  def fetch_quote(peer_id, quote_id) do
+    query =
+      from m in Message,
+        where: m.peer_id == ^peer_id and m.quote_id == ^quote_id and not m.deleted
+
+    quote_message = Repo.one(query)
+
+    case quote_message do
+      nil -> {:error, "Цитата не найдена"}
+      _ -> {:ok, quote_message}
+    end
+  end
+
+  def quote_index_to_quote_id(_peer_id, quote_index) when quote_index >= 0, do: quote_index
+
+  def quote_index_to_quote_id(peer_id, quote_index) do
+    get_last_quote_id(peer_id) + quote_index + 1
   end
 
   @spec remake_tree([Message.t()]) :: [Message.t()]
@@ -133,79 +164,19 @@ defmodule QuoteBook.Book do
     |> Repo.insert()
   end
 
-  @spec maybe_delete_quote(non_neg_integer(), integer(), non_neg_integer()) :: :deleted | :nothing
-  @doc """
-  Условно удаляет цитату. Тоже, что и `maybe_delete_quote_by_admin/2`, но
-  возвращает `:nothing`, если цитата не принадлежит пользователю.
-  """
-  def maybe_delete_quote(peer_id, quote_id, from_id) do
-    query =
-      from m in Message,
-        where:
-          m.peer_id == ^peer_id and m.from_id == ^from_id and not m.deleted and
-            m.quote_id ==
-              fragment(
-                "(CASE WHEN ? > 0 THEN ? ELSE (SELECT max(quote_id) FROM messages) + ? + 1 END)",
-                ^quote_id,
-                ^quote_id,
-                ^quote_id
-              )
-
-    maybe_delete_or_update_by_query(query)
+  @spec mark_quote_as_deleted!(Message.t()) :: Message.t()
+  def mark_quote_as_deleted!(quote_message) do
+    quote_message
+    |> Message.changeset_deletion(%{deleted: true})
+    |> Repo.update!()
   end
 
-  @spec maybe_delete_quote_by_admin(non_neg_integer(), integer()) :: :deleted | :nothing
-  @doc """
-  Условно удаляет цитату. Должно выполняться __только__ для администраторов чата.
-
-  Полностью удаляет цитату в чате, если она является последней созданной
-  в этом чате; если цитата  не является последней, то устанавливается флаг
-  `deleted = true`. В обоих случаях вернётся `:deleted`.
-
-  Если такой цитаты или чата не существует, то возвращается `:nothing`.
-  """
-  def maybe_delete_quote_by_admin(peer_id, quote_id) do
-    query =
-      from m in Message,
-        where:
-          m.peer_id == ^peer_id and not m.deleted and
-            m.quote_id ==
-              fragment(
-                "(CASE WHEN ? > 0 THEN ? ELSE (SELECT max(quote_id) FROM messages) + ? + 1 END)",
-                ^quote_id,
-                ^quote_id,
-                ^quote_id
-              )
-
-    maybe_delete_or_update_by_query(query)
+  @spec delete_quote!(Message.t()) :: Message.t()
+  def delete_quote!(quote_message) do
+    Repo.delete!(quote_message)
   end
 
-  defp maybe_delete_or_update_by_query(query) do
-    query
-    |> Repo.one()
-    |> maybe_delete_or_update()
-  end
-
-  defp maybe_delete_or_update(nil), do: :nothing
-
-  defp maybe_delete_or_update(quote_message) do
-    last_quote_id = get_last_quote_id(quote_message.peer_id)
-
-    if quote_message.quote_id == last_quote_id do
-      Repo.delete!(quote_message)
-    else
-      query =
-        from m in Message,
-          where: m.quote_id == ^quote_message.quote_id,
-          update: [set: [deleted: true]]
-
-      Repo.update_all(query, [])
-    end
-
-    :deleted
-  end
-
-  @spec insert_users(any()) :: {:ok, %{String.t() => User.t()}}
+  @spec insert_users(any()) :: {:ok, %{non_neg_integer() => User.t()}}
   @doc """
   Добавляет пользователей в БД одной транзакцией.
   """
@@ -217,6 +188,30 @@ defmodule QuoteBook.Book do
       Multi.insert(multi, num, user)
     end)
     |> Repo.transaction()
+  end
+
+  def get_chat_members(chat_id) do
+    query =
+      from u in User,
+        where: ^chat_id in u.chat_ids
+
+    Repo.all(query)
+  end
+
+  def remove_users_from_chat(chat_id, user_ids) do
+    query =
+      from u in User,
+        where: u.id in ^user_ids
+
+    Repo.update_all(query, pull: [chat_ids: chat_id])
+  end
+
+  def append_users_to_chat(chat_id, user_ids) do
+    query =
+      from u in User,
+        where: u.id in ^user_ids
+
+    Repo.update_all(query, push: [chat_ids: chat_id])
   end
 
   @doc """
@@ -237,8 +232,6 @@ defmodule QuoteBook.Book do
   Отбрасывает `id` тех пользователей, что уже добавлены в БД.
   """
   def reject_exists_user(user_ids) do
-    # TODO: проверить, будет ли оно работать с сообществами.
-    #      Ощущение, что тут может быть баг.
     query =
       from u in User,
         where: u.id in ^user_ids,
@@ -265,6 +258,13 @@ defmodule QuoteBook.Book do
 
   """
   def get_user!(id), do: Repo.get!(User, id)
+
+  def get_user(id) do
+    case Repo.get(User, id) do
+      nil -> {:error, "Not found"}
+      user -> {:ok, user}
+    end
+  end
 
   def get_users_from_message(peer_id, quote_id) do
     message_query =
@@ -341,6 +341,12 @@ defmodule QuoteBook.Book do
   """
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
+  end
+
+  def maybe_create_user(user, attrs) do
+    user
+    |> User.changeset(attrs)
+    |> Repo.insert(on_conflict: :nothing)
   end
 
   @spec get_chat(non_neg_integer()) :: Chat.t() | nil

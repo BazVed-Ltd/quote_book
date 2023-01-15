@@ -17,6 +17,11 @@ config :quote_book, QuoteBookWeb.Endpoint,
   pubsub_server: QuoteBook.PubSub,
   live_view: [signing_salt: "UQp5CdPV"]
 
+# Configure Guardian
+config :quote_book, QuoteBook.Guardian,
+       issuer: "quote_book",
+       secret_key: Atom.to_string(config_env())
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
@@ -60,6 +65,8 @@ config :quote_book, QuoteBook.Scheduler,
   jobs: [
     # Runs every six hours
     {"0 */6 * * *", &QuoteBookBot.Utils.UserLoader.update_exists_users/0},
+    # Runs every hour
+    {"0 */1 * * *", &QuoteBookBot.Utils.UserLoader.sync_chats_members/0},
   ]
 
 config :quote_book,

@@ -13,21 +13,13 @@ defmodule QuoteBookBot.Utils.UserLoader do
 
   Чтобы не было коллизий с сообществами, у них `id` увеличен на `2_000_000_000`.
   """
-  def insert_new_users_data_to_db(user_ids) do
-    {group_ids, user_ids} = Enum.split_with(user_ids, &(&1 > 2_000_000_000))
-
-    {:ok, users} =
-      get_users(user_ids)
-      |> photo_100_to_curernt_photo()
+  def insert_new_users_data_to_db(ids) do
+    {:ok, inserted} =
+      Book.reject_exists_user(ids)
+      |> get_users()
       |> Book.insert_users()
 
-    {:ok, groups} =
-      get_groups(group_ids)
-      |> photo_100_to_curernt_photo()
-      |> negate_id()
-      |> Book.insert_users()
-
-    {:ok, Map.merge(users, groups)}
+    {:ok, inserted}
   end
 
   def message_to_users_list(message) do
@@ -55,17 +47,20 @@ defmodule QuoteBookBot.Utils.UserLoader do
     ])
   end
 
-  def update_exists_users() do
-    users_list = Book.list_users()
+  def update_exists_users do
+    db_users = Book.list_users()
 
-    users_list
-    |> Stream.map(&Map.fetch!(&1, :id))
-    |> Stream.chunk_every(200)
-    |> Enum.map(&get_users/1)
-    |> List.flatten()
-    |> photo_100_to_curernt_photo()
-    |> Stream.zip(users_list)
-    |> Stream.map(&Book.change_user(elem(&1, 1), elem(&1, 0)))
+    vk_users =
+      db_users
+      |> Stream.map(&Map.fetch!(&1, :id))
+      |> Stream.chunk_every(200)
+      |> Enum.map(&get_users/1)
+      |> List.flatten()
+
+    for vk_user <- vk_users, db_user <- db_users, db_user.id == vk_user["id"] do
+      {db_user, vk_user}
+    end
+    |> Stream.map(&Book.change_user(elem(&1, 0), elem(&1, 1)))
     |> Enum.filter(fn
       %{changes: changes} when changes == %{} -> false
       _ -> true
@@ -73,33 +68,69 @@ defmodule QuoteBookBot.Utils.UserLoader do
     |> Book.update_users()
   end
 
-  defp get_users([]), do: []
+  def get_users([]), do: []
 
-  defp get_users(user_ids) do
-    VkBot.Api.exec_method("users.get", %{
-      "user_ids" => Enum.join(user_ids, ","),
-      "fields" => "photo_100"
-    })
+  def get_users(ids) do
+    code = generate_get_users_code(ids)
+
+    VkBot.Api.exec_method("execute", %{"code" => code})
   end
 
-  defp get_groups([]), do: []
+  @get_users_code """
+  var input = [%1];
 
-  defp get_groups(group_ids) do
-    group_ids = Enum.map(group_ids, fn id -> id - 2_000_000_000 end)
+  var users = [];
+  var groups = [];
 
-    VkBot.Api.exec_method("groups.getById", %{
-      "group_ids" => Enum.join(group_ids, ","),
-      "fields" => "photo_100"
-    })
-  end
+  var i = 0;
+  var inputLength = input.length;
+  while (i < inputLength) {
+    if (input[i] < 2000000000) {
+      users.push(input[i]);
+    } else {
+      groups.push(input[i] - 2000000000);
+    }
 
-  defp negate_id(groups) do
-    groups
-    |> Stream.map(fn g -> Map.update!(g, "id", &Kernel.-/1) end)
-  end
+    i = i + 1;
+  }
 
-  defp photo_100_to_curernt_photo(users) do
-    users
-    |> Stream.map(&Map.put(&1, "current_photo", &1["photo_100"]))
+  var results = [];
+
+  users = API.users.get({ user_ids: users, fields: "photo_100" });
+
+  i = 0;
+  var usersLength = users.length;
+  while (i < usersLength) {
+    results.push({
+      id: users[i].id,
+      name: users[i].first_name + " " + users[i].last_name,
+      current_photo: users[i].photo_100,
+    });
+    i = i + 1;
+  }
+
+  if (groups.length != 0) {
+    groups = API.groups.getById({ group_ids: groups, fields: "photo_100" });
+
+    i = 0;
+    var groupsLength = groups.length;
+    while (i < groupsLength) {
+      results.push({
+        id: groups[i].id + 2000000000,
+        name: groups[i].name,
+        current_photo: groups[i].photo_100,
+      });
+      i = i + 1;
+    }
+  } else {
+    groups = [];
+  }
+
+  return results;
+  """
+
+  defp generate_get_users_code(ids) do
+    joined_ids = Enum.join(ids, ", ")
+    String.replace(@get_users_code, "%1", joined_ids)
   end
 end

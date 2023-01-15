@@ -39,6 +39,9 @@ if config_env() == :prod do
   config :vk_bot,
     token: System.get_env("VK_TOKEN")
 
+  config :quote_book,
+    vk_app_token: System.get_env("VK_APP_TOKEN")
+
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want
@@ -50,6 +53,9 @@ if config_env() == :prod do
       environment variable SECRET_KEY_BASE is missing.
       You can generate one by calling: mix phx.gen.secret
       """
+
+  config :quote_book, Quotebook.Guardian,
+    secret_key: secret_key_base
 
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
