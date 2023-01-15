@@ -75,6 +75,10 @@ config :quote_book,
   back_url: "http://localhost:4000",
   screenshoter_url: "http://localhost:4001"
 
+config :hammer,
+  backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4,
+                                 cleanup_interval_ms: 60_000 * 10]}
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

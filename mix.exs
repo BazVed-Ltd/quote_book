@@ -67,6 +67,7 @@ defmodule QuoteBook.MixProject do
       {:ecto_autoslug_field, github: "wemake-services/ecto_autoslug_field"},
       {:guardian, "~> 2.0"},
       {:guardian_phoenix, "~> 2.0"},
+      {:hammer, "~> 6.1"},
       {:vk_bot, github: "Waika28/vk_bot"}
     ]
   end
