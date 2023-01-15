@@ -190,6 +190,30 @@ defmodule QuoteBook.Book do
     |> Repo.transaction()
   end
 
+  def get_chat_members(chat_id) do
+    query =
+      from u in User,
+        where: ^chat_id in u.chat_ids
+
+    Repo.all(query)
+  end
+
+  def remove_users_from_chat(chat_id, user_ids) do
+    query =
+      from u in User,
+        where: u.id in ^user_ids
+
+    Repo.update_all(query, pull: [chat_ids: chat_id])
+  end
+
+  def append_users_to_chat(chat_id, user_ids) do
+    query =
+      from u in User,
+        where: u.id in ^user_ids
+
+    Repo.update_all(query, push: [chat_ids: chat_id])
+  end
+
   @doc """
   Возвращает список всех пользователей.
 
