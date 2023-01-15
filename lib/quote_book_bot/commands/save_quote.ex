@@ -9,7 +9,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
   import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 
-  alias QuoteBookBot.Utils.{UserLoader, Attachments, ReplyMessages, Links}
+  alias QuoteBookBot.Utils.{Attachments, Links, ReplyMessages, UserLoader}
 
   defcommand request,
     predicate: [on_text: "/сьлржалсч", in: :chat] do

@@ -47,7 +47,7 @@ defmodule QuoteBookBot.Utils.UserLoader do
     ])
   end
 
-  def update_exists_users() do
+  def update_exists_users do
     db_users = Book.list_users()
 
     vk_users =

@@ -1,8 +1,8 @@
 defmodule QuoteBookWeb.IndexLive do
   use QuoteBookWeb, :live_view
 
-  alias QuoteBookWeb.ChatListItemComponent
   alias QuoteBook.Book
+  alias QuoteBookWeb.ChatListItemComponent
 
   @impl true
   def mount(_params, _session, socket) do

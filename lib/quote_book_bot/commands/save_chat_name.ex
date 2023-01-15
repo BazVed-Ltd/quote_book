@@ -7,8 +7,8 @@ defmodule QuoteBookBot.Commands.SaveChatName do
   import VkBot.{CommandsManager, Request}
   require VkBot.CommandsManager
 
-  alias QuoteBookBot.Utils.Links
   alias QuoteBook.Book
+  alias QuoteBookBot.Utils.Links
 
   defcommand request,
     predicate: [on_text: "/чат", in: :chat],

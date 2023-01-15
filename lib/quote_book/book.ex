@@ -7,7 +7,7 @@ defmodule QuoteBook.Book do
   alias Ecto.Multi
   alias QuoteBook.Repo
 
-  alias QuoteBook.Book.{Message, User, Chat, Attachment}
+  alias QuoteBook.Book.{Attachment, Chat, Message, User}
 
   @raw_sql_all_messages """
   SELECT *
@@ -39,7 +39,7 @@ defmodule QuoteBook.Book do
   @doc """
   Возвращет список чатов.
   """
-  def list_chats() do
+  def list_chats do
     Repo.all(Chat)
   end
 

@@ -2,8 +2,8 @@ defmodule QuoteBookBot.Utils.QuoteToPNG do
   @moduledoc """
   Конвертация цитаты в картинку.
   """
-  alias QuoteBookBot.Utils.Links
   alias QuoteBook.Book
+  alias QuoteBookBot.Utils.Links
 
   defp renders_directory do
     Application.get_env(:quote_book, :renders_directory)

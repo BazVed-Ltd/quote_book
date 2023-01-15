@@ -2,7 +2,8 @@ defmodule QuoteBookBot.Utils.Attachments do
   @moduledoc """
   Модуль содержит функции для загрузки вложений из сообщений.
   """
-  alias QuoteBookBot.Utils.{MapExtensions, BitstringExtensions}
+  alias QuoteBookBot.Utils.BitstringExtensions
+  alias QuoteBookBot.Utils.MapExtensions
 
   @attachments_dir Application.compile_env!(:quote_book, :attachments_directory)
 
