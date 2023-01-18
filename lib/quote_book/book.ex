@@ -35,6 +35,28 @@ defmodule QuoteBook.Book do
     |> Enum.reverse()
   end
 
+  @raw_sql_published_messages """
+  SELECT *
+  FROM messages
+  WHERE published_id IS NOT null AND NOT deleted
+  UNION ALL
+  SELECT n.*
+  FROM messages n
+  INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id OR fwd.id = n.reply_message_id
+  """
+
+  def list_published_quotes do
+    query =
+      {"message_tree", Message}
+      |> recursive_ctes(true)
+      |> with_cte("message_tree", as: fragment(@raw_sql_published_messages))
+      |> preload([:attachments, :from])
+
+    Repo.all(query)
+    |> remake_tree()
+    |> Enum.reverse()
+  end
+
   def publish_quote(quote_message) do
     published_id = get_last_published_quote_id() || 1
 
