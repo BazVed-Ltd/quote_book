@@ -35,6 +35,14 @@ defmodule QuoteBook.Book do
     |> Enum.reverse()
   end
 
+  def publish_quote(quote_message) do
+    published_id = get_last_published_quote_id() || 1
+
+    quote_message
+    |> Message.published_id_changeset(%{published_id: published_id})
+    |> Repo.update!()
+  end
+
   @spec list_chats :: [Chat.t()]
   @doc """
   Возвращет список чатов.
@@ -66,6 +74,19 @@ defmodule QuoteBook.Book do
         where: m.peer_id == ^peer_id,
         select: max(m.quote_id)
       )
+
+    Repo.one!(query)
+  end
+
+  @spec get_last_published_quote_id() :: non_neg_integer() | nil
+  @doc """
+  Возвращает id последней цитаты опубликованной цитаты.
+  Если ни одной цитаты не опубликовано, то вернёт `nil`.
+  """
+  def get_last_published_quote_id() do
+    query =
+      from m in Message,
+        select: max(m.published_id)
 
     Repo.one!(query)
   end

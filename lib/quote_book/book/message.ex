@@ -172,4 +172,10 @@ defmodule QuoteBook.Book.Message do
       user
     end
   end
+
+  def published_id_changeset(message, attrs) do
+    message
+    |> cast(attrs, [:published_id])
+    |> validate_required([:published_id])
+  end
 end
