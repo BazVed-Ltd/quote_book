@@ -4,7 +4,7 @@ defmodule QuoteBook.MixProject do
   def project do
     [
       app: :quote_book,
-      version: "1.6.1",
+      version: "1.6.2",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -82,6 +82,7 @@ defmodule QuoteBook.MixProject do
     [
       setup: ["deps.get", "ecto.setup"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.seed": ["run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]

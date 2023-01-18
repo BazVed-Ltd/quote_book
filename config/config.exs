@@ -73,7 +73,8 @@ config :quote_book,
   attachments_directory: "priv/static/attachments",
   renders_directory: "priv/static/renders",
   back_url: "http://localhost:4000",
-  screenshoter_url: "http://localhost:4001"
+  screenshoter_url: "http://localhost:4001",
+  screenshoter_key: config_env()
 
 config :hammer,
   backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4,
