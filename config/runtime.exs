@@ -54,8 +54,7 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  config :quote_book, Quotebook.Guardian,
-    secret_key: secret_key_base
+  config :quote_book, Quotebook.Guardian, secret_key: secret_key_base
 
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
@@ -63,7 +62,8 @@ if config_env() == :prod do
   config :quote_book,
     host: host,
     back_url: System.get_env("BACK_URL") || "http://quote-book:#{port}",
-    screenshoter_url: System.get_env("SCREENSHOTER_URL") || "http://site-screenshoter"
+    screenshoter_url: System.get_env("SCREENSHOTER_URL") || "http://site-screenshoter",
+    screenshoter_key: secret_key_base
 
   config :quote_book, QuoteBookWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],

@@ -17,6 +17,10 @@ defmodule QuoteBookBot.Utils.QuoteToPNG do
     Application.get_env(:quote_book, :back_url)
   end
 
+  defp secret_key do
+    Application.get_env(:quote_book, :screenshoter_key)
+  end
+
   defp json_library do
     Phoenix.json_library()
   end
@@ -74,10 +78,12 @@ defmodule QuoteBookBot.Utils.QuoteToPNG do
   defp download_quote(quote_message) do
     path = Links.quote_path(quote_message)
 
+    query = URI.encode_query([bot: true, bot_key: secret_key()])
+
     body =
       json_library().encode!(%{
         selector: "#quote",
-        url: "#{back_url()}#{path}?bot=true"
+        url: "#{back_url()}#{path}?#{query}"
       })
 
     headers = [{"Content-type", "application/json"}]
