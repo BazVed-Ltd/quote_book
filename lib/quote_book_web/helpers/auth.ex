@@ -142,7 +142,7 @@ defmodule QuoteBookWeb.Helpers.Auth do
   they use the application at all, here would be a good place.
   """
   def require_authenticated_user(conn, _opts) do
-    if conn.assigns[:current_user] do
+    if not is_nil(conn.assigns[:current_user]) or bot?(conn.query_params) do
       conn
     else
       conn
