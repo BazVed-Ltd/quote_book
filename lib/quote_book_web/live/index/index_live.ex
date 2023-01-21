@@ -23,7 +23,7 @@ defmodule QuoteBookWeb.IndexLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mt-3 flex flex-col">
+    <div class="mt-3 flex flex-col gap-5">
       <div class="card mx-auto px-9">
         <h2 class="text-center text-xl mb-4">Каналы:</h2>
         <%= if @chats == [] do %>
@@ -36,20 +36,14 @@ defmodule QuoteBookWeb.IndexLive do
           </ul>
         <% end %>
       </div>
-      <%= if @current_user do %>
-        <div class="w-50 mx-auto mt-5">
-          <p>
-            Вы вошли как <%= @current_user.name %>
-            <.link href={~p"/sign-out"} class="btn btn-vk-blue font-medium">Оформить выход</.link>
-          </p>
-        </div>
-      <% else %>
-        <div class="flex mt-5 justify-center">
-          <div class="shrink-0">
-            <.link href={~p"/sign-in"} class="btn btn-vk-blue font-medium">Оформить VK ID</.link>
-          </div>
-        </div>
-      <% end %>
+      <div class="mx-auto flex flex-col gap-5 items-center">
+        <%= if @current_user do %>
+          <p>Вы вошли как <%= @current_user.name %></p>
+          <.link href={~p"/sign-out"} class="btn btn-vk-blue font-medium">Оформить выход</.link>
+        <% else %>
+          <.link href={~p"/sign-in"} class="btn btn-vk-blue font-medium">Оформить VK ID</.link>
+        <% end %>
+      </div>
     </div>
     """
   end
