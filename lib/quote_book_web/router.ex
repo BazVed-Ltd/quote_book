@@ -24,12 +24,7 @@ defmodule QuoteBookWeb.Router do
     live_session :index,
       on_mount: [{Auth, :mount_current_user}] do
       live "/", IndexLive
-    end
-
-    live_session :chats,
-      on_mount: [{Auth, :mount_current_user}, {Auth, :ensure_authenticated}] do
-      live "/c/:peer_id", ChatLive
-      live "/c/:peer_id/:quote_id", QuoteLive
+      live "/feed", FeedLive
     end
   end
 
@@ -39,6 +34,18 @@ defmodule QuoteBookWeb.Router do
     live_session :sign_in,
       on_mount: [{QuoteBookWeb.Helpers.Auth, :redirect_if_user_is_authenticated}] do
       live "/sign-in", SignInLive
+    end
+  end
+
+  scope "/", QuoteBookWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/sign-out", SignInController, :delete
+
+    live_session :chats,
+      on_mount: [{Auth, :mount_current_user}, {Auth, :ensure_authenticated}] do
+      live "/c/:peer_id", ChatLive
+      live "/c/:peer_id/:quote_id", QuoteLive
     end
   end
 

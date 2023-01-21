@@ -39,6 +39,7 @@ defmodule QuoteBook.Book.Message do
   @type t :: %__MODULE__{
     id: non_neg_integer() | nil,
     quote_id: non_neg_integer() | nil,
+    published_id: non_neg_integer() | nil,
     peer_id: non_neg_integer() | nil,
     from_id: non_neg_integer() | nil,
     text: String.t() | nil,
@@ -55,6 +56,7 @@ defmodule QuoteBook.Book.Message do
 
   schema "messages" do
     field :quote_id, :id
+    field :published_id, :id
 
     belongs_to :from, QuoteBook.Book.User
 
@@ -169,5 +171,11 @@ defmodule QuoteBook.Book.Message do
     else
       user
     end
+  end
+
+  def published_id_changeset(message, attrs) do
+    message
+    |> cast(attrs, [:published_id])
+    |> validate_required([:published_id])
   end
 end
