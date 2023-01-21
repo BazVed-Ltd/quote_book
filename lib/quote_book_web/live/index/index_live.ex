@@ -44,8 +44,10 @@ defmodule QuoteBookWeb.IndexLive do
           </p>
         </div>
       <% else %>
-        <div class="w-40 mx-auto mt-5">
-          <.link href={~p"/sign-in"} class="btn btn-vk-blue font-medium">Оформить VK ID</.link>
+        <div class="flex mt-5 justify-center">
+          <div class="shrink-0">
+            <.link href={~p"/sign-in"} class="btn btn-vk-blue font-medium">Оформить VK ID</.link>
+          </div>
         </div>
       <% end %>
     </div>

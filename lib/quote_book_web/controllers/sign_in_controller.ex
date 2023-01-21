@@ -1,7 +1,7 @@
 defmodule QuoteBookWeb.SignInController do
-
   alias QuoteBook.Book.User
   use QuoteBookWeb, :controller
+
 
   def delete(conn, _params) do
     conn
@@ -9,7 +9,11 @@ defmodule QuoteBookWeb.SignInController do
     |> redirect(~p"/")
   end
 
-  def create(conn, %{"token" => silent_token, "uuid" => uuid, "user" => %{"id" => user_id}}) do
+  def create(conn, %{"payload" => payload}) do
+    %{"token" => silent_token, "uuid" => uuid, "user" => user} =
+      Phoenix.json_library().decode!(payload)
+    %{"id" => user_id} = user
+
     case check_user(uuid, silent_token, user_id) do
       {:ok, user_attrs} ->
         user_attrs = convert_vk_response_to_db(user_attrs)
