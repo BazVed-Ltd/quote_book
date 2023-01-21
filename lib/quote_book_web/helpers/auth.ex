@@ -106,9 +106,7 @@ defmodule QuoteBookWeb.Helpers.Auth do
   defp bot?(params) do
     key = Application.get_env(:quote_book, :screenshoter_key)
 
-    if !is_nil(key) and params["bot"] == "true" do
-      params["bot_key"] == key or key == :dev
-    end
+    params["bot"] == "true" and params["bot_key"] == key
   end
 
   defp mount_current_user(session, socket) do
