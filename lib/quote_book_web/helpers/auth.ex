@@ -4,6 +4,11 @@ defmodule QuoteBookWeb.Helpers.Auth do
   import Plug.Conn
   import Phoenix.Controller
 
+  def token_key do
+    Guardian.Plug.Keys.token_key(:default)
+    |> Atom.to_string()
+  end
+
   def fetch_current_user(conn, _opts) do
     with {token, conn} <- ensure_user_token(conn),
          {:ok, claims} <- QuoteBook.Guardian.decode_and_verify(token, %{"typ" => "access"}),
@@ -15,13 +20,9 @@ defmodule QuoteBookWeb.Helpers.Auth do
   end
 
   def ensure_user_token(conn) do
-    key =
-      Guardian.Plug.Keys.token_key(:default)
-      |> Atom.to_string()
+    conn = fetch_cookies(conn, signed: [token_key()])
 
-    conn = fetch_cookies(conn, signed: [key])
-
-    if token = conn.cookies[key] do
+    if token = conn.cookies[token_key()] do
       {token, put_token_in_session(conn, token)}
     else
       {nil, conn}
@@ -32,6 +33,17 @@ defmodule QuoteBookWeb.Helpers.Auth do
     conn
     |> put_session(:user_token, token)
     |> put_session(:live_socket_id, "users_sessions:#{Base.url_encode64(token)}")
+  end
+
+  def log_out_user(conn) do
+    if live_socket_id = get_session(conn, :live_socket_id) do
+      QuoteBookWeb.Endpoint.broadcast(live_socket_id, "disconnect", %{})
+    end
+
+    conn
+    |> clear_session()
+    |> delete_resp_cookie(token_key())
+    |> redirect(to: "/")
   end
 
   @doc """
@@ -71,7 +83,10 @@ defmodule QuoteBookWeb.Helpers.Auth do
     else
       socket =
         socket
-        |> Phoenix.LiveView.put_flash(:error, "У вас нет доступа. Для получения доступа необходимо авторизоваться.")
+        |> Phoenix.LiveView.put_flash(
+          :error,
+          "У вас нет доступа. Для получения доступа необходимо авторизоваться."
+        )
         |> Phoenix.LiveView.redirect(to: ~p"/")
 
       {:halt, socket}

@@ -3,6 +3,12 @@ defmodule QuoteBookWeb.SignInController do
   alias QuoteBook.Book.User
   use QuoteBookWeb, :controller
 
+  def delete(conn, _params) do
+    conn
+    |> QuoteBookWeb.Helpers.Auth.log_out_user
+    |> redirect(~p"/")
+  end
+
   def create(conn, %{"token" => silent_token, "uuid" => uuid, "user" => %{"id" => user_id}}) do
     case check_user(uuid, silent_token, user_id) do
       {:ok, user_attrs} ->

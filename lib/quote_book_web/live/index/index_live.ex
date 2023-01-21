@@ -40,6 +40,7 @@ defmodule QuoteBookWeb.IndexLive do
         <div class="w-50 mx-auto mt-5">
           <p>
             Вы вошли как <%= @current_user.name %>
+            <.link href={~p"/sign-out"} class="btn btn-vk-blue font-medium">Оформить выход</.link>
           </p>
         </div>
       <% else %>
