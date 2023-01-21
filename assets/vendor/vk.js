@@ -1,60 +1,78 @@
 import { Config, Connect, ConnectEvents } from "@vkontakte/superappkit";
 
-Config.init({
-  appId: 51516504, // Идентификатор приложения
-});
+const SIGN_IN_PATH = "/sign-in";
+const REDIRECT_AUTH_URL = `${window.location.protocol}//${window.location.host}${SIGN_IN_PATH}`;
+
+const VK_ONE_TAP_OPTIONS = {
+  showAlternativeLogin: false, // отображает кнопку входа другим способом
+  showAgreements: true, // в значении true отображает окно политик конфиденциальности в том случае, если пользователь еще не принимал политики
+  displayMode: "phone_name", // отображает данных пользователя, возможные значения: default — только имя, name_phone — имя и телефон, phone_name — телефон и имя
+  buttonStyles: {
+    borderRadius: 12, // Радиус скругления кнопок
+  },
+};
+
+function try_login_with_payload() {
+  const params = new Proxy(new URLSearchParams(window.location.search), {
+    get: (searchParams, prop) => searchParams.get(prop),
+  });
+
+  if (params.payload != undefined) {
+    login(JSON.parse(params.payload));
+    return true;
+  }
+  return false;
+}
+
+function login(payload) {
+  params = new URLSearchParams({
+    payload: JSON.stringify(payload)
+  });
+  fetch(`${SIGN_IN_PATH}?${params}`, {
+    method: "post",
+  })
+    .then((data) => {
+      if (data.status === 200) {
+        window.location.href = "/";
+      }
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+}
 
 export default {
   mounted() {
-    const pushEvent = this.pushEvent.bind(this);
+    Config.init({
+      appId: 51516504, // Идентификатор приложения
+    });
+
+    if (try_login_with_payload()) return;
+
     let vkButton = Connect.buttonOneTapAuth({
       callback: function (evt) {
-        const type = evt.type;
-        if (!type) {
-          return;
-        }
-        switch (type) {
+        if (!evt.type) return;
+        switch (evt.type) {
           case ConnectEvents.OneTapAuthEventsSDK.LOGIN_SUCCESS:
-            fetch(`/sign-in`, {
-              method: "post",
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(evt.payload),
-            })
-              .then((data) => {
-                if (data.status === 200) {
-                  window.location.href = "/";
-                }
-              });
+            login(evt.payload);
             return;
           // Для событий PHONE_VALIDATION_NEEDED и FULL_AUTH_NEEDED нужно открыть полноценный VK ID, чтобы пользователь дорегистрировался или валидировал телефон
           case ConnectEvents.OneTapAuthEventsSDK.FULL_AUTH_NEEDED:
           case ConnectEvents.OneTapAuthEventsSDK.PHONE_VALIDATION_NEEDED:
           case ConnectEvents.ButtonOneTapAuthEventsSDK.SHOW_LOGIN:
             return Connect.redirectAuth({
-              url: window.location.protocol + "//" + window.location.host,
-              state: "dj29fnsadjsd82",
+              url: REDIRECT_AUTH_URL
             });
           case ConnectEvents.ButtonOneTapAuthEventsSDK.SHOW_LOGIN_OPTIONS:
             // Параметр screen: phone позволяет сразу открыть окно ввода телефона в VK ID
             return Connect.redirectAuth({
-              url: window.location.protocol + "//" + window.location.host,
-              state: "dj29fnsadjsd82",
+              url: REDIRECT_AUTH_URL,
               screen: "phone",
             });
         }
         return;
       },
-      options: {
-        showAlternativeLogin: false, // отображает кнопку входа другим способом
-        showAgreements: true, // в значении true отображает окно политик конфиденциальности в том случае, если пользователь еще не принимал политики
-        displayMode: "phone_name", // отображает данных пользователя, возможные значения: default — только имя, name_phone — имя и телефон, phone_name — телефон и имя
-        buttonStyles: {
-          borderRadius: 12, // Радиус скругления кнопок
-        },
-      },
+      options: VK_ONE_TAP_OPTIONS,
     });
 
     this.el.appendChild(vkButton.getFrame());
