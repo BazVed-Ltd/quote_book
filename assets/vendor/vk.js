@@ -1,7 +1,8 @@
 import { Config, Connect, ConnectEvents } from "@vkontakte/superappkit";
 
 const SIGN_IN_PATH = "/sign-in";
-const REDIRECT_AUTH_URL = `${window.location.protocol}//${window.location.host}${SIGN_IN_PATH}`;
+const BASE_URL = `${window.location.protocol}//${window.location.host}`;
+const REDIRECT_AUTH_URL = `${BASE_URL}${SIGN_IN_PATH}`;
 
 const VK_ONE_TAP_OPTIONS = {
   showAlternativeLogin: false, // отображает кнопку входа другим способом
@@ -12,19 +13,19 @@ const VK_ONE_TAP_OPTIONS = {
   },
 };
 
-function try_login_with_payload() {
+function try_login_with_payload(returnTo) {
   const params = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(prop),
   });
 
   if (params.payload != undefined) {
-    login(JSON.parse(params.payload));
+    login(JSON.parse(params.payload), returnTo);
     return true;
   }
   return false;
 }
 
-function login(payload) {
+function login(payload, redirect_path) {
   params = new URLSearchParams({
     payload: JSON.stringify(payload)
   });
@@ -33,7 +34,7 @@ function login(payload) {
   })
     .then((data) => {
       if (data.status === 200) {
-        window.location.href = "/";
+        window.location.href = redirect_path;
       }
     })
     .catch((reason) => {
@@ -43,18 +44,20 @@ function login(payload) {
 
 export default {
   mounted() {
+    const returnTo = this.el.dataset.returnTo;
+
     Config.init({
       appId: 51516504, // Идентификатор приложения
     });
 
-    if (try_login_with_payload()) return;
+    if (try_login_with_payload(returnTo)) return;
 
     let vkButton = Connect.buttonOneTapAuth({
       callback: function (evt) {
         if (!evt.type) return;
         switch (evt.type) {
           case ConnectEvents.OneTapAuthEventsSDK.LOGIN_SUCCESS:
-            login(evt.payload);
+            login(evt.payload, returnTo);
             return;
           // Для событий PHONE_VALIDATION_NEEDED и FULL_AUTH_NEEDED нужно открыть полноценный VK ID, чтобы пользователь дорегистрировался или валидировал телефон
           case ConnectEvents.OneTapAuthEventsSDK.FULL_AUTH_NEEDED:

@@ -150,7 +150,7 @@ defmodule QuoteBookWeb.Helpers.Auth do
       conn
       |> put_flash(:error, "У вас нет доступа. Для получения доступа необходимо авторизоваться.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/")
+      |> redirect(to: ~p"/sign-in")
       |> halt()
     end
   end
