@@ -13,7 +13,7 @@ defmodule QuoteBookWeb.QuoteLive do
     ~H"""
     <div class="mx-auto mt-5 max-w-lg">
       <div id="quote">
-        <QuoteBookWeb.QuoteComponent.message_quote quote={@quote} bot?={@bot?} />
+        <QuoteBookWeb.QuoteComponent.message_quote socket={@socket} quote={@quote} bot?={@bot?} />
       </div>
     </div>
     """

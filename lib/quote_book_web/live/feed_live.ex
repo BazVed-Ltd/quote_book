@@ -22,7 +22,7 @@ defmodule QuoteBookWeb.FeedLive do
         <h1 class="text-xl text-center">Лента</h1>
     </div>
     <div class="mt-5">
-      <QuoteComponent.quotes quotes={@quotes} type={:published} />
+      <QuoteComponent.quotes socket={@socket} quotes={@quotes} type={:published} />
     </div>
     """
   end
