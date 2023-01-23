@@ -29,6 +29,7 @@ defmodule QuoteBook.Book do
       |> recursive_ctes(true)
       |> with_cte("message_tree", as: fragment(@raw_sql_all_messages, ^peer_id))
       |> preload([:attachments, :from])
+      |> order_by([m], [asc: m.id])
 
     Repo.all(query)
     |> remake_tree()
@@ -51,6 +52,7 @@ defmodule QuoteBook.Book do
       |> recursive_ctes(true)
       |> with_cte("message_tree", as: fragment(@raw_sql_published_messages))
       |> preload([:attachments, :from])
+      |> order_by([m], [asc: m.id])
 
     Repo.all(query)
     |> remake_tree()
