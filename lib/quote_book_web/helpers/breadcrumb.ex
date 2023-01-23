@@ -1,12 +1,15 @@
 defmodule QuoteBookWeb.Helpers.Breadcrumb do
 
+  alias QuoteBookWeb.IndexLive
+  alias QuoteBookWeb.Router.Helpers, as: Routes
+
   import Phoenix.LiveView, only: [assign: 2]
 
   def append_to_socket(socket, name, path) do
     if is_nil(socket.assigns[:breadcrumb]) do
       breadcrumb =
         new()
-        |> append("Главная", "/")
+        |> append("Главная", Routes.live_path(socket, IndexLive))
         |> append(name, path)
 
       assign(socket, breadcrumb: breadcrumb)
@@ -30,8 +33,8 @@ defmodule QuoteBookWeb.Helpers.Breadcrumb do
   def to_list(breadcrumb) do
     breadcrumb
     |> :queue.to_list()
-    |> Enum.scan({"", ""}, fn {name, path}, {_last_name, last_path} ->
-        {name, last_path <> path}
+    |> Enum.scan(fn {name, path}, {_last_name, last_path} ->
+        {name, Path.join(last_path, path)}
     end)
   end
 end
