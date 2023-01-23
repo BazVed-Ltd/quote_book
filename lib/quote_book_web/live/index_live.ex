@@ -3,6 +3,7 @@ defmodule QuoteBookWeb.IndexLive do
 
   alias QuoteBook.Book
   alias QuoteBook.Book.Chat
+  alias QuoteBookWeb.{ChatLive, SignInLive}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -32,7 +33,8 @@ defmodule QuoteBookWeb.IndexLive do
           <ul>
             <%= for chat <- @chats do %>
               <li>
-                <.link href={~p"/c/#{Chat.slug_or_id(chat)}"}><%= chat.title || chat.id %></.link>
+                <%= live_redirect chat.title || chat.id,
+                      to: Routes.live_path(assigns.socket, ChatLive, Chat.slug_or_id(chat)) %>
               </li>
             <% end %>
           </ul>
@@ -41,9 +43,13 @@ defmodule QuoteBookWeb.IndexLive do
       <div class="mx-auto flex flex-col gap-5 items-center">
         <%= if @current_user do %>
           <p>Вы вошли как <%= @current_user.name %></p>
-          <.link href={~p"/sign-out"} class="btn btn-vk-blue font-medium">Оформить выход</.link>
+          <%= link "Оформить выход",
+                to: Routes.sign_in_path(assigns.socket, :delete),
+                class: "btn btn-vk-blue font-medium" %>
         <% else %>
-          <.link href={~p"/sign-in"} class="btn btn-vk-blue font-medium">Оформить VK ID</.link>
+          <%= live_redirect "Оформить VK ID",
+                to: Routes.live_path(assigns.socket, SignInLive),
+                class: "btn btn-vk-blue font-medium" %>
         <% end %>
       </div>
     </div>

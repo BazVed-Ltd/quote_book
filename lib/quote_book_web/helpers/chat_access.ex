@@ -1,6 +1,4 @@
 defmodule QuoteBookWeb.Helpers.ChatAccess do
-  use Phoenix.VerifiedRoutes, endpoint: QuoteBookWeb.Endpoint, router: QuoteBookWeb.Router
-
   def on_mount(:default, _params, _session, socket) do
     user = socket.assigns.user
     chat = socket.assigns.chat
@@ -14,7 +12,7 @@ defmodule QuoteBookWeb.Helpers.ChatAccess do
          :error,
          "У вас нет доступа к этому чату."
        )
-       |> Phoenix.LiveView.redirect(to: ~p"/")}
+       |> Phoenix.LiveView.redirect(to: "/")}
     end
   end
 end
