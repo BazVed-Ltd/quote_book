@@ -17,11 +17,7 @@ config :quote_book, QuoteBookWeb.Endpoint,
   pubsub_server: QuoteBook.PubSub,
   live_view: [signing_salt: "UQp5CdPV"]
 
-# Configure Guardian
-config :quote_book, QuoteBook.Guardian,
-       issuer: "quote_book",
-       secret_key: Atom.to_string(config_env())
-
+config :quote_book, Quotebook.Guardian, issuer: "quote_book"
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
@@ -52,31 +48,25 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :tailwind, version: "3.2.4", default: [
-  args: ~w(
+config :tailwind,
+  version: "3.2.4",
+  default: [
+    args: ~w(
     --config=tailwind.config.js
     --input=css/app.css
     --output=../priv/static/assets/app.css
   ),
-  cd: Path.expand("../assets", __DIR__)
-]
+    cd: Path.expand("../assets", __DIR__)
+  ]
 
 config :quote_book, QuoteBook.Scheduler,
   jobs: [
     # Runs every six hours
-    {"0 */6 * * *", &QuoteBookBot.Utils.UserLoader.update_exists_users/0},
+    {"0 */6 * * *", &QuoteBookBot.Utils.UserLoader.update_exists_users/0}
   ]
 
-config :quote_book,
-  attachments_directory: "priv/static/attachments",
-  renders_directory: "priv/static/renders",
-  back_url: "http://localhost:4000",
-  screenshoter_url: "http://localhost:4001",
-  screenshoter_key: config_env()
-
 config :hammer,
-  backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4,
-                                 cleanup_interval_ms: 60_000 * 10]}
+  backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4, cleanup_interval_ms: 60_000 * 10]}
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
