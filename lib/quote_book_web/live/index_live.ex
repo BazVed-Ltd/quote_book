@@ -2,7 +2,7 @@ defmodule QuoteBookWeb.IndexLive do
   use QuoteBookWeb, :live_view
 
   alias QuoteBook.Book
-  alias QuoteBookWeb.ChatListItemComponent
+  alias QuoteBook.Book.Chat
 
   @impl true
   def mount(_params, _session, socket) do
@@ -31,7 +31,9 @@ defmodule QuoteBookWeb.IndexLive do
         <% else %>
           <ul>
             <%= for chat <- @chats do %>
-              <ChatListItemComponent.chat socket={@socket} chat={chat} />
+              <li>
+                <.link href={~p"/c/#{Chat.slug_or_id(chat)}"}><%= chat.title || chat.id %></.link>
+              </li>
             <% end %>
           </ul>
         <% end %>
