@@ -6,7 +6,7 @@ defmodule QuoteBookWeb.Helpers.Loader do
 
   alias QuoteBook.Book
   alias QuoteBook.Book.Chat
-  alias QuoteBookWeb.Helpers.Breadcrumb
+  import QuoteBookWeb.Helpers.Breadcrumb, only: [append_to_socket: 3]
 
   defp redirect_on_error(socket, opts) do
     to = Keyword.get(opts, :to, "/")
@@ -16,23 +16,6 @@ defmodule QuoteBookWeb.Helpers.Loader do
      socket
      |> push_redirect(to: to)
      |> put_flash(:error, error)}
-  end
-
-  defp append_to_breadcrumb(socket, name, path) do
-    if is_nil(socket.assigns[:breadcrumb]) do
-      breadcrumb =
-        Breadcrumb.new()
-        |> Breadcrumb.append("Главная", "/")
-        |> Breadcrumb.append(name, path)
-
-      assign(socket, breadcrumb: breadcrumb)
-    else
-      breadcrumb =
-        socket.assigns.breadcrumb
-        |> Breadcrumb.append(name, path)
-
-      assign(socket, breadcrumb: breadcrumb)
-    end
   end
 
   @doc """
@@ -55,7 +38,7 @@ defmodule QuoteBookWeb.Helpers.Loader do
       {:cont,
        socket
        |> assign(chat: chat)
-       |> append_to_breadcrumb(chat.title || "Чат", "c/#{Chat.slug_or_id(chat)}/")}
+       |> append_to_socket(chat.title || "Чат", "c/#{Chat.slug_or_id(chat)}/")}
     end
   end
 
@@ -71,7 +54,7 @@ defmodule QuoteBookWeb.Helpers.Loader do
       {:cont,
        socket
        |> assign(quote: quote_message)
-       |> append_to_breadcrumb("Цитата", Integer.to_string(quote_id) <> "/")}
+       |> append_to_socket("Цитата", Integer.to_string(quote_id) <> "/")}
     else
       _otherwise ->
         redirect_on_error(socket,

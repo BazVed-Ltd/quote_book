@@ -1,4 +1,24 @@
 defmodule QuoteBookWeb.Helpers.Breadcrumb do
+
+  import Phoenix.LiveView, only: [assign: 2]
+
+  def append_to_socket(socket, name, path) do
+    if is_nil(socket.assigns[:breadcrumb]) do
+      breadcrumb =
+        new()
+        |> append("Главная", "/")
+        |> append(name, path)
+
+      assign(socket, breadcrumb: breadcrumb)
+    else
+      breadcrumb =
+        socket.assigns.breadcrumb
+        |> append(name, path)
+
+      assign(socket, breadcrumb: breadcrumb)
+    end
+  end
+
   def new do
     :queue.new()
   end
