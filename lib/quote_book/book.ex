@@ -109,7 +109,7 @@ defmodule QuoteBook.Book do
   Возвращает id последней цитаты опубликованной цитаты.
   Если ни одной цитаты не опубликовано, то вернёт `nil`.
   """
-  def get_last_published_id() do
+  def get_last_published_id do
     query =
       from m in Message,
         select: max(m.published_id)

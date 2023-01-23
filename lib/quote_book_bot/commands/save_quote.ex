@@ -37,8 +37,6 @@ defmodule QuoteBookBot.Commands.SaveQuote do
              |> UserLoader.insert_new_users_data_to_db(),
            {:ok, deep} <- parse_deep_from_args(args),
            {:ok, message_quote} <- QuoteBook.Book.create_quote_from_message(message, deep) do
-        IO.inspect(s)
-
         """
         Добавил.
         #{Links.quote_link(chat, message_quote)}
