@@ -7,11 +7,13 @@ defmodule QuoteBookWeb.QuoteComponent do
   @links_regex ~r/\[(id|club)([0-9]+)\|(.+?)\]/
 
   def quotes(assigns) do
+    assigns = assign_new(assigns, :type, fn -> nil end)
+
     ~H"""
     <ul class="flex flex-col max-w-lg px-3 sm:px-0 mx-auto">
       <%= for quote_message <- @quotes do %>
         <li class="mb-5">
-          <.message_quote quote={quote_message} />
+          <.message_quote quote={quote_message} type={@type} />
         </li>
       <% end %>
     </ul>
@@ -33,8 +35,15 @@ defmodule QuoteBookWeb.QuoteComponent do
       |> DateTime.add(3, :hour)
       |> Calendar.strftime("%d.%m.%Y в %H:%M")
 
+    rendered_id =
+      case assigns[:type] do
+        :published -> assigns.quote.published_id
+        _ -> assigns.quote.quote_id
+      end
+
     assigns =
       assign(assigns,
+        rendered_id: rendered_id,
         nested_messages: nested_messages,
         author: author,
         author_url: author_url,
@@ -46,7 +55,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     ~H"""
     <div class={"card" <> if @bot? do "-borderless" else "" end}>
       <div class="flex border-b border-zinc-700 pb-2 mb-3">
-        <div>#<%= @quote.quote_id %></div>
+        <div>#<%= @rendered_id %></div>
         <div
           id={"quote-#{@quote.quote_id}-date"}
           class="ml-auto"
