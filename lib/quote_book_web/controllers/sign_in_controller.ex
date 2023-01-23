@@ -17,8 +17,8 @@ defmodule QuoteBookWeb.SignInController do
          {:ok, user_id} <- Map.fetch(user, "id"),
          {:ok, user_attrs} <- check_user(uuid, silent_token, user_id),
          user_attrs = convert_vk_response_to_db(user_attrs),
-         {:ok, user} = QuoteBook.Book.maybe_create_user(%User{}, user_attrs),
-         {:ok, token, _claims} = QuoteBook.Guardian.encode_and_sign(user) do
+         {:ok, user} <- QuoteBook.Book.maybe_create_user(%User{}, user_attrs),
+         {:ok, token, _claims} <- QuoteBook.Guardian.encode_and_sign(user) do
       conn
       |> put_resp_cookie(token_key(), token, secure: true, sign: true)
       |> text("OK")
@@ -28,16 +28,12 @@ defmodule QuoteBookWeb.SignInController do
         |> put_status(400)
         |> text(error)
 
-      {:error, error} ->
-        Logger.error(error)
-
+      {:error, _error} ->
         conn
         |> put_status(400)
         |> text("Сообщите об ошибке вашему администратору.")
 
-      payload ->
-        Logger.error("Invalid payload: #{inspect(payload)}")
-
+      _error ->
         conn
         |> put_status(400)
         |> text("Неверные данные. Попробуйте ещё раз.")
