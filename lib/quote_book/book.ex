@@ -58,7 +58,9 @@ defmodule QuoteBook.Book do
   end
 
   def publish_quote(quote_message) do
-    published_id = get_last_published_quote_id() || 1
+    previous_published_id = get_last_published_id() || 0
+
+    published_id = previous_published_id + 1
 
     quote_message
     |> Message.published_id_changeset(%{published_id: published_id})
@@ -100,12 +102,12 @@ defmodule QuoteBook.Book do
     Repo.one!(query)
   end
 
-  @spec get_last_published_quote_id() :: non_neg_integer() | nil
+  @spec get_last_published_id() :: non_neg_integer() | nil
   @doc """
   Возвращает id последней цитаты опубликованной цитаты.
   Если ни одной цитаты не опубликовано, то вернёт `nil`.
   """
-  def get_last_published_quote_id() do
+  def get_last_published_id() do
     query =
       from m in Message,
         select: max(m.published_id)
