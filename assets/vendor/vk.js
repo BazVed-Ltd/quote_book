@@ -20,7 +20,7 @@ function try_login_with_payload(errorPusher) {
   if (params.payload != undefined) {
     return login(JSON.parse(params.payload), errorPusher);
   }
-  new Promise();
+  return new Promise(() => undefined);
 }
 
 async function login(payload, errorPusher) {
