@@ -4,7 +4,7 @@ defmodule QuoteBook.MixProject do
   def project do
     [
       app: :quote_book,
-      version: "1.6.3+part.1",
+      version: "1.6.3+part.2",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -42,15 +42,15 @@ defmodule QuoteBook.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.7.0-rc.0", override: true},
+      {:phoenix, "~> 1.6.15"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.18.3"},
+      {:phoenix_live_view, "~> 0.17.5"},
       {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.7.2"},
+      {:phoenix_live_dashboard, "~> 0.6"},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
@@ -63,7 +63,6 @@ defmodule QuoteBook.MixProject do
       {:quantum, "~> 3.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:heroicons, "~> 0.5.2"},
       {:ecto_autoslug_field, github: "wemake-services/ecto_autoslug_field"},
       {:guardian, "~> 2.0"},
       {:guardian_phoenix, "~> 2.0"},

@@ -1,7 +1,8 @@
 import { Config, Connect, ConnectEvents } from "@vkontakte/superappkit";
 
 const SIGN_IN_PATH = "/sign-in";
-const REDIRECT_AUTH_URL = `${window.location.protocol}//${window.location.host}${SIGN_IN_PATH}`;
+const BASE_URL = `${window.location.protocol}//${window.location.host}`;
+const REDIRECT_AUTH_URL = `${BASE_URL}${SIGN_IN_PATH}`;
 
 const VK_ONE_TAP_OPTIONS = {
   showAlternativeLogin: false, // отображает кнопку входа другим способом
@@ -12,18 +13,18 @@ const VK_ONE_TAP_OPTIONS = {
   },
 };
 
-function try_login_with_payload(errorPusher) {
+function try_login_with_payload(errorPusher, returnTo) {
   const params = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(prop),
   });
 
   if (params.payload != undefined) {
-    return login(JSON.parse(params.payload), errorPusher);
+    return login(JSON.parse(params.payload), errorPusher, returnTo);
   }
   return new Promise(() => undefined);
 }
 
-async function login(payload, errorPusher) {
+async function login(payload, errorPusher, returnTo) {
   params = new URLSearchParams({
     payload: JSON.stringify(payload),
   });
@@ -31,7 +32,7 @@ async function login(payload, errorPusher) {
     method: "post",
   });
   if (response.status === 200) {
-    window.location.href = "/";
+    window.location.href = returnTo;
   } else {
     const text = await response.text();
     errorPusher(text);
@@ -44,20 +45,22 @@ function createErrorPusher(pushEvent) {
 
 export default {
   mounted() {
+    const returnTo = this.el.dataset.returnTo;
+
     Config.init({
       appId: 51516504, // Идентификатор приложения
     });
 
     const errorPusher = createErrorPusher(this.pushEvent.bind(this));
 
-    try_login_with_payload(errorPusher);
+    try_login_with_payload(errorPusher, returnTo);
 
     let vkButton = Connect.buttonOneTapAuth({
       callback: function (evt) {
         if (!evt.type) return;
         switch (evt.type) {
           case ConnectEvents.OneTapAuthEventsSDK.LOGIN_SUCCESS:
-            login(evt.payload, errorPusher);
+            login(evt.payload, errorPusher, returnTo);
             return;
           // Для событий PHONE_VALIDATION_NEEDED и FULL_AUTH_NEEDED нужно открыть полноценный VK ID, чтобы пользователь дорегистрировался или валидировал телефон
           case ConnectEvents.OneTapAuthEventsSDK.FULL_AUTH_NEEDED:

@@ -2,12 +2,10 @@ defmodule QuoteBookWeb.SignInController do
   alias QuoteBook.Book.User
   use QuoteBookWeb, :controller
 
-  require Logger
-
   def delete(conn, _params) do
     conn
     |> QuoteBookWeb.Helpers.Auth.log_out_user()
-    |> redirect(~p"/")
+    |> redirect(Routes.live_path(conn, QuoteBookWeb.IndexLive))
   end
 
   def create(conn, %{"payload" => payload}) do

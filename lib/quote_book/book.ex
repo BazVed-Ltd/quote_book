@@ -29,6 +29,7 @@ defmodule QuoteBook.Book do
       |> recursive_ctes(true)
       |> with_cte("message_tree", as: fragment(@raw_sql_all_messages, ^peer_id))
       |> preload([:attachments, :from])
+      |> order_by([m], [asc: m.id])
 
     Repo.all(query)
     |> remake_tree()
@@ -51,6 +52,7 @@ defmodule QuoteBook.Book do
       |> recursive_ctes(true)
       |> with_cte("message_tree", as: fragment(@raw_sql_published_messages))
       |> preload([:attachments, :from])
+      |> order_by([m], [asc: m.id])
 
     Repo.all(query)
     |> remake_tree()
@@ -58,11 +60,44 @@ defmodule QuoteBook.Book do
   end
 
   def publish_quote(quote_message) do
-    published_id = get_last_published_quote_id() || 1
+    previous_published_id = get_last_published_id() || 0
+
+    published_id = previous_published_id + 1
 
     quote_message
     |> Message.published_id_changeset(%{published_id: published_id})
     |> Repo.update!()
+  end
+
+  def cancel_publish_quote(quote_message) do
+    quote_message
+    |> Message.published_id_changeset(%{published_id: nil})
+    |> Repo.update!()
+  end
+
+  @raw_sql_published_messages """
+  SELECT *
+  FROM messages
+  WHERE published_id = ? AND NOT deleted
+  UNION ALL
+  SELECT n.*
+  FROM messages n
+  INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id OR fwd.id = n.reply_message_id
+  """
+
+  def get_users_from_published(published_id) do
+    message_query =
+      {"message_tree", Message}
+      |> recursive_ctes(true)
+      |> with_cte("message_tree", as: fragment(@raw_sql_published_messages, ^published_id))
+
+    query =
+      from q in message_query,
+        left_join: u in User,
+        on: q.from_id == u.id,
+        select: u
+
+    Repo.all(query)
   end
 
   @spec list_chats :: [Chat.t()]
@@ -100,12 +135,12 @@ defmodule QuoteBook.Book do
     Repo.one!(query)
   end
 
-  @spec get_last_published_quote_id() :: non_neg_integer() | nil
+  @spec get_last_published_id() :: non_neg_integer() | nil
   @doc """
   Возвращает id последней цитаты опубликованной цитаты.
   Если ни одной цитаты не опубликовано, то вернёт `nil`.
   """
-  def get_last_published_quote_id() do
+  def get_last_published_id do
     query =
       from m in Message,
         select: max(m.published_id)
@@ -143,6 +178,19 @@ defmodule QuoteBook.Book do
     query =
       from m in Message,
         where: m.peer_id == ^peer_id and m.quote_id == ^quote_id and not m.deleted
+
+    quote_message = Repo.one(query)
+
+    case quote_message do
+      nil -> {:error, "Цитата не найдена"}
+      _ -> {:ok, quote_message}
+    end
+  end
+
+  def fetch_published_quote(published_id) do
+    query =
+      from m in Message,
+        where: m.published_id == ^published_id and not m.deleted
 
     quote_message = Repo.one(query)
 

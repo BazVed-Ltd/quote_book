@@ -1,6 +1,4 @@
 defmodule QuoteBookWeb.Helpers.Auth do
-  use QuoteBookWeb, :verified_routes
-
   import Plug.Conn
   import Phoenix.Controller
 
@@ -87,7 +85,7 @@ defmodule QuoteBookWeb.Helpers.Auth do
           :error,
           "У вас нет доступа. Для получения доступа необходимо авторизоваться."
         )
-        |> Phoenix.LiveView.redirect(to: ~p"/")
+        |> Phoenix.LiveView.redirect(to: "/")
 
       {:halt, socket}
     end
@@ -112,14 +110,14 @@ defmodule QuoteBookWeb.Helpers.Auth do
   defp mount_current_user(session, socket) do
     case session do
       %{"user_token" => user_token} ->
-        Phoenix.Component.assign_new(socket, :current_user, fn ->
+        Phoenix.LiveView.assign_new(socket, :current_user, fn ->
           {:ok, claims} = QuoteBook.Guardian.decode_and_verify(user_token, %{"typ" => "access"})
           {:ok, user} = QuoteBook.Guardian.resource_from_claims(claims)
           user
         end)
 
       %{} ->
-        Phoenix.Component.assign_new(socket, :current_user, fn -> nil end)
+        Phoenix.LiveView.assign_new(socket, :current_user, fn -> nil end)
     end
   end
 
@@ -148,7 +146,7 @@ defmodule QuoteBookWeb.Helpers.Auth do
       conn
       |> put_flash(:error, "У вас нет доступа. Для получения доступа необходимо авторизоваться.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/")
+      |> redirect(to: "/sign-in")
       |> halt()
     end
   end
@@ -159,5 +157,5 @@ defmodule QuoteBookWeb.Helpers.Auth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: ~p"/"
+  defp signed_in_path(_conn), do: "/"
 end

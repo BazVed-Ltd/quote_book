@@ -1,0 +1,21 @@
+<main class="container mx-auto">
+  <p class="alert alert-info" role="alert"
+    phx-click="lv:clear-flash"
+    phx-value-key="info"><%= live_flash(@flash, :info) %></p>
+
+  <%= unless is_nil(live_flash(@flash, :error)) do %>
+    <div class="flex">
+      <div class="mx-auto card m-3 text-center" role="alert"
+        phx-click="lv:clear-flash"
+        phx-value-key="error">
+
+        <p>
+          <%= live_flash(@flash, :error) %>
+        </p>
+
+      </div>
+    </div>
+  <% end %>
+
+  <%= @inner_content %>
+</main>

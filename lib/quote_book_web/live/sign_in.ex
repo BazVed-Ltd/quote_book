@@ -2,8 +2,8 @@ defmodule QuoteBookWeb.SignInLive do
   use QuoteBookWeb, :live_view
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, socket}
+  def mount(_params, session, socket) do
+    {:ok, assign(socket, user_return_to: session["user_return_to"] || "/")}
   end
 
   @impl true
@@ -12,7 +12,14 @@ defmodule QuoteBookWeb.SignInLive do
     <div class="mt-3 flex flex-col">
       <div class="card mx-auto px-9">
         <h1 class="text-2xl text-center">Войти</h1>
-        <div id="vk-login" class="mx-auto mt-5 max-w-full" phx-hook="vkLoginHook" phx-update="ignore"></div>
+        <div
+          id="vk-login"
+          class="mx-auto mt-5 max-w-full"
+          phx-hook="vkLoginHook"
+          phx-update="ignore"
+          data-return-to={@user_return_to}
+        >
+        </div>
       </div>
     </div>
     """

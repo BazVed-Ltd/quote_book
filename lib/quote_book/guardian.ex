@@ -1,4 +1,5 @@
 defmodule QuoteBook.Guardian do
+  @moduledoc false
   use Guardian, otp_app: :quote_book
 
   def subject_for_token(%QuoteBook.Book.User{id: id}, _claims) do

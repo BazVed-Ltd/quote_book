@@ -75,7 +75,7 @@ defmodule QuoteBookWeb.ChatLive do
       </div>
     <% end %>
     <div class="mt-5">
-      <QuoteComponent.quotes quotes={@quotes} />
+      <QuoteComponent.quotes socket={@socket} quotes={@quotes} />
     </div>
     """
   end

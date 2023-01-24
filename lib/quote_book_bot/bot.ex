@@ -14,7 +14,8 @@ defmodule QuoteBookBot.Bot do
       Commands.AddCoverToChat,
       Commands.DeleteQuote,
       Commands.Help,
-      Commands.PublishQuote
+      Commands.PublishQuote,
+      Commands.CancelPublish
     ]
   end
 end

@@ -8,7 +8,7 @@ defmodule QuoteBookWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
-    plug :put_root_layout, {QuoteBookWeb.Layouts, :root}
+    plug :put_root_layout, {QuoteBookWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
@@ -24,8 +24,9 @@ defmodule QuoteBookWeb.Router do
     live_session :index,
       on_mount: [{Auth, :mount_current_user}] do
       live "/", IndexLive
-      live "/feed", FeedLive
     end
+
+    live "/feed", FeedLive
   end
 
   scope "/", QuoteBookWeb do

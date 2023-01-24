@@ -62,13 +62,13 @@ config :tailwind,
 config :quote_book, QuoteBook.Scheduler,
   jobs: [
     # Runs every six hours
-    {"0 */6 * * *", &QuoteBookBot.Utils.UserLoader.update_exists_users/0},
-    # Runs every hour
-    {"0 */1 * * *", &QuoteBookBot.Utils.UserLoader.sync_chats_members/0}
+    {"0 */6 * * *", &QuoteBookBot.Utils.UserLoader.update_exists_users/0}
   ]
 
 config :hammer,
   backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4, cleanup_interval_ms: 60_000 * 10]}
+
+config :quote_book, attachments_directory: "priv/static/attachments"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

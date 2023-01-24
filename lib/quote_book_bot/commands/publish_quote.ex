@@ -52,8 +52,8 @@ defmodule QuoteBookBot.Commands.PublishQuote do
       {:ok, id}
     else
       {:error, _message} = error -> error
-      {_id, _remainder} -> @arg_error_text
-      :error -> @arg_error_text
+      {_id, _remainder} -> {:error, @arg_error_text}
+      :error -> {:error, @arg_error_text}
     end
   end
 

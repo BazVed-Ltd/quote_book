@@ -19,7 +19,6 @@ defmodule QuoteBookWeb.ConnCase do
 
   using do
     quote do
-      use QuoteBookWeb, :verified_routes
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
