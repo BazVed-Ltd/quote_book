@@ -69,6 +69,37 @@ defmodule QuoteBook.Book do
     |> Repo.update!()
   end
 
+  def cancel_publish_quote(quote_message) do
+    quote_message
+    |> Message.published_id_changeset(%{published_id: nil})
+    |> Repo.update!()
+  end
+
+  @raw_sql_published_messages """
+  SELECT *
+  FROM messages
+  WHERE published_id = ? AND NOT deleted
+  UNION ALL
+  SELECT n.*
+  FROM messages n
+  INNER JOIN message_tree fwd ON fwd.id = n.fwd_from_message_id OR fwd.id = n.reply_message_id
+  """
+
+  def get_users_from_published(published_id) do
+    message_query =
+      {"message_tree", Message}
+      |> recursive_ctes(true)
+      |> with_cte("message_tree", as: fragment(@raw_sql_published_messages, ^published_id))
+
+    query =
+      from q in message_query,
+        left_join: u in User,
+        on: q.from_id == u.id,
+        select: u
+
+    Repo.all(query)
+  end
+
   @spec list_chats :: [Chat.t()]
   @doc """
   Возвращет список чатов.
@@ -147,6 +178,19 @@ defmodule QuoteBook.Book do
     query =
       from m in Message,
         where: m.peer_id == ^peer_id and m.quote_id == ^quote_id and not m.deleted
+
+    quote_message = Repo.one(query)
+
+    case quote_message do
+      nil -> {:error, "Цитата не найдена"}
+      _ -> {:ok, quote_message}
+    end
+  end
+
+  def fetch_published_quote(published_id) do
+    query =
+      from m in Message,
+        where: m.published_id == ^published_id and not m.deleted
 
     quote_message = Repo.one(query)
 
