@@ -24,8 +24,9 @@ defmodule QuoteBookWeb.Router do
     live_session :index,
       on_mount: [{Auth, :mount_current_user}] do
       live "/", IndexLive
-      live "/feed", FeedLive
     end
+
+    live "/feed", FeedLive
   end
 
   scope "/", QuoteBookWeb do
