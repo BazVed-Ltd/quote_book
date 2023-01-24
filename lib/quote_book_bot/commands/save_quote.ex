@@ -30,7 +30,7 @@ defmodule QuoteBookBot.Commands.SaveQuote do
       with {:ok, chat} <-
              QuoteBook.Book.get_or_new_chat(message["peer_id"])
              |> QuoteBook.Book.create_or_update_chat(%{}),
-           {:allow, s} <- Hammer.check_rate("save_quote:#{user_id} ", @limit_in_ms, 20),
+           {:allow, _} <- Hammer.check_rate("save_quote:#{user_id} ", @limit_in_ms, 20),
            {:ok, _users} <-
              UserLoader.message_to_users_list(message)
              |> QuoteBook.Book.reject_exists_user()
