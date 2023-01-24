@@ -16,11 +16,17 @@ defmodule QuoteBookWeb.SignInLive do
           id="vk-login"
           class="mx-auto mt-5 max-w-full"
           phx-hook="vkLoginHook"
+          phx-update="ignore"
           data-return-to={@user_return_to}
         >
         </div>
       </div>
     </div>
     """
+  end
+
+  @impl true
+  def handle_event("error", message, socket) do
+    {:noreply, Phoenix.LiveView.put_flash(socket, :error, message)}
   end
 end

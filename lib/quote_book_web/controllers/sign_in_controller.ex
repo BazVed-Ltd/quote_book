@@ -9,31 +9,32 @@ defmodule QuoteBookWeb.SignInController do
   end
 
   def create(conn, %{"payload" => payload}) do
-    %{"token" => silent_token, "uuid" => uuid, "user" => user} =
-      Phoenix.json_library().decode!(payload)
-
-    %{"id" => user_id} = user
-
-    case check_user(uuid, silent_token, user_id) do
-      {:ok, user_attrs} ->
-        user_attrs = convert_vk_response_to_db(user_attrs)
-
-        {:ok, user} = QuoteBook.Book.maybe_create_user(%User{}, user_attrs)
-
-        {:ok, token, _claims} = QuoteBook.Guardian.encode_and_sign(user)
-
-        key =
-          Guardian.Plug.Keys.token_key(:default)
-          |> Atom.to_string()
-
-        conn
-        |> put_resp_cookie(key, token, secure: true, sign: true)
-        |> text("success")
-
-      :error ->
+    with {:ok, data} = Phoenix.json_library().decode(payload),
+         %{"token" => silent_token, "uuid" => uuid, "user" => user} <-
+           data,
+         {:ok, user_id} <- Map.fetch(user, "id"),
+         {:ok, user_attrs} <- check_user(uuid, silent_token, user_id),
+         user_attrs = convert_vk_response_to_db(user_attrs),
+         {:ok, user} <- QuoteBook.Book.maybe_create_user(%User{}, user_attrs),
+         {:ok, token, _claims} <- QuoteBook.Guardian.encode_and_sign(user) do
+      conn
+      |> put_resp_cookie(token_key(), token, secure: true, sign: true)
+      |> text("OK")
+    else
+      {:error, error} when is_binary(error) ->
         conn
         |> put_status(400)
-        |> text("error")
+        |> text(error)
+
+      {:error, _error} ->
+        conn
+        |> put_status(400)
+        |> text("Сообщите об ошибке вашему администратору.")
+
+      _error ->
+        conn
+        |> put_status(400)
+        |> text("Неверные данные. Попробуйте ещё раз.")
     end
   end
 
@@ -48,7 +49,7 @@ defmodule QuoteBookWeb.SignInController do
            }
          ) do
       %{"success" => [%{"user_id" => ^user_id} = user]} -> {:ok, user}
-      _error -> :error
+      _error -> {:error, "Токен недействителен."}
     end
   end
 
@@ -68,5 +69,10 @@ defmodule QuoteBookWeb.SignInController do
       last_name: last_name,
       current_photo: current_photo
     }
+  end
+
+  defp token_key do
+    Guardian.Plug.Keys.token_key(:default)
+    |> Atom.to_string()
   end
 end

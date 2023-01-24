@@ -17,7 +17,7 @@ config :quote_book, QuoteBookWeb.Endpoint,
   pubsub_server: QuoteBook.PubSub,
   live_view: [signing_salt: "UQp5CdPV"]
 
-config :quote_book, Quotebook.Guardian, issuer: "quote_book"
+config :quote_book, QuoteBook.Guardian, issuer: "quote_book"
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
