@@ -1,6 +1,6 @@
 defmodule QuoteBookWeb.Helpers.ChatAccess do
   def on_mount(:default, _params, _session, socket) do
-    user = socket.assigns.user
+    user = socket.assigns.current_user
     chat = socket.assigns.chat
 
     if chat.id in user.chat_ids do

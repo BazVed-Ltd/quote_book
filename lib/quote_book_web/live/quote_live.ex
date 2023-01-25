@@ -2,6 +2,7 @@ defmodule QuoteBookWeb.QuoteLive do
   use QuoteBookWeb, :live_view
 
   on_mount {QuoteBookWeb.Helpers.Loader, :chat}
+  on_mount QuoteBookWeb.Helpers.ChatAccess
   on_mount {QuoteBookWeb.Helpers.Loader, :quote}
 
   def mount(params, _session, socket) do
