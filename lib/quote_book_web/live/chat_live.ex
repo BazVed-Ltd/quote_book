@@ -4,9 +4,8 @@ defmodule QuoteBookWeb.ChatLive do
   import Phoenix.LiveView
 
   alias QuoteBook.Book
+  alias QuoteBook.Book.Chat
   alias QuoteBookWeb.QuoteComponent
-
-  on_mount {QuoteBookWeb.Helpers.Loader, :chat}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -16,7 +15,8 @@ defmodule QuoteBookWeb.ChatLive do
      socket
      |> assign(quotes: quotes)
      |> assign_title()
-     |> assign_covers()}
+     |> assign_covers()
+     |> assign(:chat_slug_or_id, Chat.slug_or_id(socket.assigns.chat))}
   end
 
   defp assign_title(socket) when is_binary(socket.assigns.chat.title) do
@@ -75,7 +75,11 @@ defmodule QuoteBookWeb.ChatLive do
       </div>
     <% end %>
     <div class="mt-5">
-      <QuoteComponent.quotes socket={@socket} quotes={@quotes} />
+      <QuoteComponent.quotes
+        socket={@socket}
+        quotes={@quotes}
+        chat_slug_or_id={@chat_slug_or_id}
+      />
     </div>
     """
   end

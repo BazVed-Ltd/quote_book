@@ -9,7 +9,7 @@ defmodule QuoteBookWeb.SignInController do
   end
 
   def create(conn, %{"payload" => payload}) do
-    with {:ok, data} = Phoenix.json_library().decode(payload),
+    with {:ok, data} <- Phoenix.json_library().decode(payload),
          %{"token" => silent_token, "uuid" => uuid, "user" => user} <-
            data,
          {:ok, user_id} <- Map.fetch(user, "id"),

@@ -44,7 +44,11 @@ defmodule QuoteBookWeb.Router do
     get "/sign-out", SignInController, :delete
 
     live_session :chats,
-      on_mount: [{Auth, :ensure_authenticated}] do
+      on_mount: [
+        {Auth, :ensure_authenticated},
+        {QuoteBookWeb.Helpers.Loader, :chat},
+        QuoteBookWeb.Helpers.ChatAccess
+      ] do
       live "/c/:peer_id", ChatLive
       live "/c/:peer_id/:quote_id", QuoteLive
     end

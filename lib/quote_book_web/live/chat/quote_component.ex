@@ -14,7 +14,12 @@ defmodule QuoteBookWeb.QuoteComponent do
     <ul class="flex flex-col max-w-lg px-3 sm:px-0 mx-auto">
       <%= for quote_message <- @quotes do %>
         <li class="mb-5">
-          <.message_quote socket={@socket} quote={quote_message} type={@type} />
+          <.message_quote
+            socket={@socket}
+            quote={quote_message}
+            type={@type}
+            chat_slug_or_id={@chat_slug_or_id}
+          />
         </li>
       <% end %>
     </ul>
@@ -42,15 +47,16 @@ defmodule QuoteBookWeb.QuoteComponent do
         _ -> assigns.quote.quote_id
       end
 
-    path = case assigns[:type] do
+      quote_link = case assigns[:type] do
         :published -> "/feed" # TODO: Create FeedQuoteLive
-        _ -> Routes.live_path(assigns.socket, QuoteLive, assigns.quote.peer_id, used_id)
+        _ ->
+          route = Routes.live_path(assigns.socket, QuoteLive, assigns.chat_slug_or_id, used_id)
+          live_redirect("##{used_id}", to: route, class: "text-white")
       end
 
     assigns =
       assign(assigns,
-        used_id: used_id,
-        path: path,
+        quote_link: quote_link,
         nested_messages: nested_messages,
         author: author,
         author_url: author_url,
@@ -62,7 +68,7 @@ defmodule QuoteBookWeb.QuoteComponent do
     ~H"""
     <div class={"card" <> if @bot? do "-borderless" else "" end}>
       <div class="flex border-b border-zinc-700 pb-2 mb-3">
-        <a href={@path} class="text-white">#<%= @used_id %></a>
+        <%= @quote_link %>
         <div
           id={"quote-#{@quote.quote_id}-date"}
           class="ml-auto"

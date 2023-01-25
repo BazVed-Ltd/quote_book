@@ -3,7 +3,7 @@ defmodule QuoteBookWeb.IndexLive do
 
   alias QuoteBook.Book
   alias QuoteBook.Book.Chat
-  alias QuoteBookWeb.{ChatLive, SignInLive, FeedLive}
+  alias QuoteBookWeb.{ChatLive, FeedLive, SignInLive}
 
   @impl true
   def mount(_params, _session, socket) do
