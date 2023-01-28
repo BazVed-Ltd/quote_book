@@ -25,13 +25,13 @@ defmodule QuoteBookBot.Commands.Help do
 
   defp help_text do
     text =
-      QuoteBookBot.Bot.commands()
-      |> Enum.map_join("\n", fn module ->
-        module
-        |> get_module_doc()
-        |> String.split("\n")
-        |> Enum.at(0)
-      end)
+      for command <- QuoteBookBot.Bot.commands(),
+          result = fetch_module_doc(command),
+          not_error?(result) do
+        {:ok, doc} = result
+        get_first_line(doc)
+      end
+      |> Enum.join("\n")
 
     text <> "\n\nPowered by [club209871027|Grand Catware Server]"
   end
@@ -39,14 +39,32 @@ defmodule QuoteBookBot.Commands.Help do
   defp help_text(command) do
     QuoteBookBot.Bot.commands()
     |> Enum.find_value("Нет такой команды!", fn module ->
-      doc = get_module_doc(module)
-      first_word = doc |> String.split(" ") |> Enum.at(0)
-      if String.bag_distance(first_word, command) > 0.7, do: doc
+      case fetch_module_doc(module) do
+        {:ok, doc} ->
+          first_word = doc |> String.split(" ") |> Enum.at(0)
+          if String.bag_distance(first_word, command) > 0.7, do: doc
+
+        :error ->
+          false
+      end
     end)
   end
 
-  defp get_module_doc(module) do
-    {:docs_v1, _, :elixir, _, %{"en" => module_doc}, _, _} = Code.fetch_docs(module)
-    module_doc
+  defp fetch_module_doc(module) do
+    {:docs_v1, _, :elixir, _, doc, _, _} = Code.fetch_docs(module)
+
+    case doc do
+      :hidden -> :error
+      %{"en" => module_doc} -> {:ok, module_doc}
+    end
+  end
+
+  defp not_error?(:error), do: false
+  defp not_error?(_), do: true
+
+  defp get_first_line(doc) do
+    doc
+    |> String.split("\n")
+    |> Enum.at(0)
   end
 end

@@ -39,12 +39,12 @@ defmodule QuoteBookWeb.ChatLive do
   defp do_assign_covers(socket, [cover]) do
     assign(socket,
       render_cover?: true,
-      cover: cover
+      cover: "/" <> cover
     )
   end
 
   defp do_assign_covers(socket, covers) do
-    cover_queue = Enum.reduce(Enum.shuffle(covers), :queue.new(), &:queue.in(&1, &2))
+    cover_queue = Enum.reduce(Enum.shuffle(covers), :queue.new(), &:queue.in("/" <> &1, &2))
 
     {current, next_covers} = queue_cycle(cover_queue)
 
