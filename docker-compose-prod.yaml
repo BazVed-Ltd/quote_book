@@ -16,6 +16,7 @@ services:
     restart: unless-stopped
     environment:
       PORT: 80
+    restart: unless-stopped
 
   quote-book:
     build:
@@ -34,6 +35,7 @@ services:
       - ${PORT}:4000
     volumes:
       - attachments:/app/attachments
+    restart: unless-stopped
 
 volumes:
   postgres:
