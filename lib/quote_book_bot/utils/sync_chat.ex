@@ -1,4 +1,5 @@
 defmodule QuoteBookBot.Utils.SyncChat do
+  @moduledoc false
   @sync_every_in_seconds 30 * 60
 
   def predicate(request) do
